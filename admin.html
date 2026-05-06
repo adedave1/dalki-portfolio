@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Dalki</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">Dal<span>ki</span></div>
+    <div class="login-tagline">ADMIN DASHBOARD</div>
+    <form class="login-form" id="loginForm">
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="you@email.com" required autocomplete="email">
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+          <button type="button" class="pw-toggle" id="pwToggle">Show</button>
+        </div>
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <button type="submit" class="btn-login" id="loginBtn">
+        <span id="loginSpinner" class="btn-spinner"></span>
+        Sign In
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard" style="display:none">
+
+  <!-- Mobile topbar -->
+  <div class="mobile-topbar">
+    <div class="mobile-topbar-logo">Dal<span>ki</span></div>
+    <button class="btn-mobile-logout" id="logoutBtnMobile">Sign out</button>
+  </div>
+
+  <div class="dashboard-body">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">Dal<span>ki</span></div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-panel="projects">
+          <span class="nav-icon">📁</span> Projects
+          <span class="nav-badge" id="navBadge" style="display:none"></span>
+        </button>
+        <button class="nav-item" data-panel="upload">
+          <span class="nav-icon">➕</span> New Project
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="admin-email" id="adminEmail"></div>
+        <button class="btn-logout" id="logoutBtn">Sign out</button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- Projects Panel -->
+      <div class="panel active" id="panel-projects">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Projects</div>
+            <div class="panel-sub" id="projectCount">Loading…</div>
+          </div>
+          <button class="btn-new" id="btnNewProject">+ New Project</button>
+        </div>
+        <div class="project-table-wrap">
+          <div class="project-table-head">
+            <span></span>
+            <span>Title</span>
+            <span>Category</span>
+            <span>Status</span>
+            <span>Actions</span>
+          </div>
+          <div id="projectList"></div>
+        </div>
+      </div>
+
+      <!-- Upload Panel -->
+      <div class="panel" id="panel-upload">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title" id="uploadPanelTitle">New Project</div>
+            <div class="panel-sub">Fill in the details below</div>
+          </div>
+        </div>
+
+        <form class="upload-form" id="uploadForm">
+          <input type="hidden" id="editId">
+
+          <!-- Image drop zone -->
+          <div class="drop-zone" id="dropZone">
+            <div class="drop-inner" id="dropInner">
+              <div class="drop-icon">🖼️</div>
+              <div class="drop-label">Click or drag image here</div>
+              <div class="drop-sub">PNG, JPG, WEBP — max 10MB</div>
+            </div>
+            <div class="drop-preview" id="dropPreview">
+              <img id="previewImg" src="" alt="Preview">
+              <button type="button" class="preview-remove" id="removeImg">✕</button>
+            </div>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" style="display:none">
+
+          <!-- Progress -->
+          <div class="upload-progress" id="uploadProgress">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <span class="progress-label" id="progressLabel">0%</span>
+          </div>
+
+          <!-- Fields -->
+          <div class="form-grid">
+            <div class="field-group">
+              <label>Project Title *</label>
+              <input type="text" id="fieldTitle" placeholder="e.g. MrSudoku" required>
+            </div>
+            <div class="field-group">
+              <label>Category *</label>
+              <select id="fieldCategory" required>
+                <option value="">Select category…</option>
+                <option value="game">Game</option>
+                <option value="product">Product</option>
+                <option value="ui">UI / Design</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="field-group field-group--full">
+              <label>Description</label>
+              <textarea id="fieldDescription" rows="3" placeholder="Short description shown on the project card…"></textarea>
+            </div>
+            <div class="field-group field-group--full">
+              <label>Problem <span class="label-hint">What problem does it solve?</span></label>
+              <textarea id="fieldProblem" rows="2" placeholder="e.g. Existing apps were too cluttered…"></textarea>
+            </div>
+            <div class="field-group field-group--full">
+              <label>What I Built <span class="label-hint">What did you build?</span></label>
+              <textarea id="fieldSolution" rows="2" placeholder="e.g. Native Android app with custom keyboard…"></textarea>
+            </div>
+            <div class="field-group field-group--full">
+              <label>Results <span class="label-hint">Key outcomes</span></label>
+              <textarea id="fieldResults" rows="2" placeholder="e.g. 4.8★ on Play Store · 1.2k users in month 1"></textarea>
+            </div>
+            <div class="field-group field-group--full">
+              <label>Tech Stack <span class="label-hint">comma separated</span></label>
+              <input type="text" id="fieldTags" placeholder="e.g. Kotlin, Room DB, 2 Weeks">
+            </div>
+            <div class="field-group">
+              <label>Status</label>
+              <select id="fieldPublished">
+                <option value="true">Live (visible on site)</option>
+                <option value="false">Draft (hidden)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-error" id="formError"></div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save" id="saveBtn">
+              <span id="saveBtnLabel">Save project</span>
+            </button>
+            <button type="button" class="btn-cancel" id="btnCancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-overlay" id="deleteModal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Delete project?</div>
+    <div class="modal-body">This will permanently remove the project from your portfolio. This cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="cancelDelete">Cancel</button>
+      <button class="btn-delete-confirm" id="confirmDelete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
