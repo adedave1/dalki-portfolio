@@ -3,27 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Dalki is a mobile app developer crafting polished Android & iOS apps and mobile games. Available for freelance projects.">
+<meta name="description" content="Dalki builds production-grade Android apps, mobile games, and full-stack products. Kotlin, Jetpack Compose, Firebase, Supabase. Available for freelance.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://dalki.web.app/">
+<link rel="canonical" href="https://dalki1.web.app/">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://dalki.web.app/">
-<meta property="og:title" content="Dalki | Mobile App Developer">
-<meta property="og:description" content="I build polished, production-ready Android & iOS apps and mobile games.">
-<meta property="og:image" content="https://dalki.web.app/images/featured.webp">
+<meta property="og:url" content="https://dalki1.web.app/">
+<meta property="og:title" content="Dalki | Android Developer & Game Builder">
+<meta property="og:description" content="Production-grade Android apps and mobile games. Kotlin, Jetpack Compose, Firebase.">
+<meta property="og:image" content="https://dalki1.web.app/og-image.png">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Dalki | Mobile App Developer">
-<meta name="twitter:description" content="I build polished, production-ready Android & iOS apps and mobile games.">
-<meta name="twitter:image" content="https://dalki.web.app/images/featured.webp">
+<meta name="twitter:title" content="Dalki | Android Developer & Game Builder">
+<meta name="twitter:description" content="Production-grade Android apps and mobile games. Kotlin, Jetpack Compose, Firebase.">
+<meta name="twitter:image" content="https://dalki1.web.app/og-image.png">
 
-<!-- Favicon -->
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="alternate icon" href="favicon.ico">
-<title>Dalki | Mobile App Developer</title>
+<!-- Inline Favicon SVG -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236366F1'/%3E%3Ctext x='50' y='68' font-family='Arial' font-size='55' font-weight='bold' fill='white' text-anchor='middle'%3ED%3C/text%3E%3C/svg%3E">
+<title>Dalki | Android Developer & Game Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
@@ -51,6 +50,11 @@
   opacity: 0; transition: all 0.3s ease; pointer-events: none; white-space: nowrap;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Featured loading state */
+.feat-loading { display: flex; align-items: center; justify-content: center; min-height: 420px; color: var(--muted); font-size: 14px; }
+.feat-loading::after { content: ''; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; margin-left: 12px; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -72,21 +76,21 @@
 <!-- HERO -->
 <header class="hero">
   <div class="hero-eyebrow">Available for freelance projects</div>
-  <h1>Mobile App <span class="aw">Developer</span><br>&amp; Game Builder</h1>
-  <p class="hero-sub">I build polished, production-ready Android &amp; iOS apps — from complex app architecture to smooth, engaging game systems.</p>
+  <h1>I build Android apps<br>&amp; <span class="aw">mobile games</span></h1>
+  <p class="hero-sub">Kotlin, Jetpack Compose, Firebase. Production-grade apps with real architecture — not prototypes. Based in Nigeria, shipping worldwide.</p>
   <div class="hero-buttons">
     <a href="#projects" class="btn btn-p">
-      View Projects
+      See My Work
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
-    <a href="#contact" class="btn btn-g">Contact Me</a>
+    <a href="#contact" class="btn btn-g">Start a Project</a>
   </div>
   <div class="hero-stats">
-    <div class="stat"><div class="stat-num">3+</div><div class="stat-label">Years building</div></div>
+    <div class="stat"><div class="stat-num">4+</div><div class="stat-label">Years building</div></div>
     <div class="stat-div"></div>
     <div class="stat"><div class="stat-num">10+</div><div class="stat-label">Apps shipped</div></div>
     <div class="stat-div"></div>
-    <div class="stat"><div class="stat-num">4.8★</div><div class="stat-label">Avg rating</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Live sites</div></div>
   </div>
 </header>
 
@@ -95,13 +99,13 @@
 <!-- ABOUT -->
 <section id="about" class="section">
   <div class="sec-label">About</div>
-  <div class="sec-title">Production-grade apps.<br>Built to last.</div>
-  <p class="about-main">I build full mobile applications — not quick prototypes. Whether it's a feature-rich Android app, a polished iOS experience, or a complete mobile game, I care about architecture, performance, and code that scales.</p>
+  <div class="sec-title">Shipped apps.<br>Real users.</div>
+  <p class="about-main">I don't do tutorials — I ship. From a Sudoku app with custom game logic to a glassmorphism chat app with WebRTC calls, I build full products end-to-end. Architecture first, polish second, launch third.</p>
   <div style="margin-bottom:20px">
-    <span class="focus-pill">📱 Android &amp; iOS Apps</span>
-    <span class="focus-pill">🎮 Mobile Games</span>
-    <span class="focus-pill">⚡ Scalable Architecture</span>
-    <span class="focus-pill">🛒 E-commerce</span>
+    <span class="focus-pill">📱 Android (Kotlin + Compose)</span>
+    <span class="focus-pill">🎮 Mobile Games (Godot)</span>
+    <span class="focus-pill">🔥 Firebase &amp; Supabase</span>
+    <span class="focus-pill">🛒 Full-Stack Products</span>
   </div>
   <div class="about-grid rs">
     <div class="about-card"><span class="about-card-icon">🏗️</span><h3>Full-Product Thinking</h3><p>I build complete, shippable apps with real architecture — not throwaway prototypes.</p></div>
@@ -118,12 +122,12 @@
   <div class="sec-label">Skills</div>
   <div class="sec-title">What I bring to<br>every project</div>
   <div class="skills-grid rs">
-    <div class="skill-card"><div class="skill-icon">📐</div><div><h3>Android &amp; iOS Architecture</h3><p>Clean patterns built to scale</p></div></div>
-    <div class="skill-card"><div class="skill-icon">✨</div><div><h3>Mobile UX Optimization</h3><p>Interfaces users actually enjoy</p></div></div>
-    <div class="skill-card"><div class="skill-icon">⚙️</div><div><h3>Performance Tuning</h3><p>Speed that users feel immediately</p></div></div>
-    <div class="skill-card"><div class="skill-icon">🎮</div><div><h3>Game Logic Design</h3><p>Engaging systems with smooth loops</p></div></div>
-    <div class="skill-card"><div class="skill-icon">💡</div><div><h3>Full-Cycle App Development</h3><p>Concept to store listing, end to end</p></div></div>
-    <div class="skill-card"><div class="skill-icon">🔌</div><div><h3>API &amp; Backend Integration</h3><p>Solid data pipelines, not leaky buckets</p></div></div>
+    <div class="skill-card"><div class="skill-icon">📐</div><div><h3>Android &amp; iOS Architecture</h3><p>MVVM, Repository pattern, Clean Architecture</p></div></div>
+    <div class="skill-card"><div class="skill-icon">✨</div><div><h3>Jetpack Compose UI</h3><p>Custom animations, state management, theming</p></div></div>
+    <div class="skill-card"><div class="skill-icon">⚙️</div><div><h3>Performance Tuning</h3><p>Memory leaks, startup time, battery optimization</p></div></div>
+    <div class="skill-card"><div class="skill-icon">🎮</div><div><h3>Game Logic Design</h3><p>Godot 4, 2D physics, AI behavior, mobile controls</p></div></div>
+    <div class="skill-card"><div class="skill-icon">💡</div><div><h3>Full-Cycle Development</h3><p>Concept → Code → Play Store listing</p></div></div>
+    <div class="skill-card"><div class="skill-icon">🔌</div><div><h3>Backend Integration</h3><p>Firebase, Supabase, REST APIs, payment gateways</p></div></div>
   </div>
 </section>
 
@@ -133,43 +137,27 @@
 <section id="stack" class="section">
   <div class="sec-label">Tech Stack</div>
   <div class="sec-title">Tools I trust</div>
-  <p class="sec-desc">Carefully chosen for mobile-first performance and developer sanity.</p>
+  <p class="sec-desc">Chosen for mobile-first performance and shipping speed.</p>
   <div class="stack-grid rs">
-    <div class="stack-pill"><em>🐦</em> Flutter</div>
     <div class="stack-pill"><em>🤖</em> Kotlin</div>
-    <div class="stack-pill"><em>🍎</em> Swift</div>
+    <div class="stack-pill"><em>🎨</em> Jetpack Compose</div>
+    <div class="stack-pill"><em>🐦</em> Flutter</div>
+    <div class="stack-pill"><em>🎮</em> Godot 4</div>
     <div class="stack-pill"><em>🔥</em> Firebase</div>
-    <div class="stack-pill"><em>🎨</em> Figma</div>
-    <div class="stack-pill"><em>🔗</em> REST APIs</div>
+    <div class="stack-pill"><em>⚡</em> Supabase</div>
     <div class="stack-pill"><em>🗄️</em> Room DB</div>
-    <div class="stack-pill"><em>📦</em> SQLite</div>
+    <div class="stack-pill"><em>💳</em> Paystack</div>
   </div>
 </section>
 
 <div class="sec-div"></div>
 
-<!-- FEATURED -->
+<!-- FEATURED — Dynamic from Firestore -->
 <section id="featured" class="section">
   <div class="sec-label">Flagship Work</div>
   <div class="sec-title">Featured Project</div>
-  <div class="featured-wrap reveal">
-    <div class="feat-img">
-      <picture>
-        <source srcset="images/featured.webp" type="image/webp">
-        <img src="images/featured.png" alt="Offline Productivity Focus App" loading="lazy" onerror="this.closest('picture').replaceWith(Object.assign(document.createElement('div'),{className:'feat-ph',innerHTML:'🎯'}))">
-      </picture>
-    </div>
-    <div class="feat-txt">
-      <div class="feat-tag">★ Flagship Project</div>
-      <div class="feat-title">Offline Productivity Focus App</div>
-      <p class="feat-desc">A mobile app designed to improve focus and reduce distractions with a clean, minimal interface built for real daily use.</p>
-      <div class="feat-meta">
-        <div class="meta-item"><b>Problem it solves</b><p>Most focus apps are cluttered, ad-filled, and require internet. Users just needed a fast timer and task list.</p></div>
-        <div class="meta-item"><b>What I built</b><p>Lightweight Flutter app, offline-first, 60fps animations, under 3s cold start, dark mode default.</p></div>
-        <div class="meta-item"><b>Results</b><p>4.8★ on Play Store · 1.2k users in month 1 · 0 crash reports</p></div>
-      </div>
-      <a href="#modal-featured" class="case-btn modal-trigger">View Full Case Study <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-    </div>
+  <div class="featured-wrap reveal" id="featured-wrap">
+    <div class="feat-loading">Loading featured project...</div>
   </div>
 </section>
 
@@ -187,7 +175,7 @@
     <button class="filter-btn" data-filter="flutter">Flutter</button>
   </div>
   <div class="project-grid rs" id="dynamic-projects">
-    <div class="proj-loading">Loading projects…</div>
+    <div class="proj-loading">Loading projects...</div>
   </div>
 </section>
 
@@ -216,10 +204,10 @@
 <!-- CONTACT -->
 <section id="contact" class="section">
   <div class="sec-label">Get in Touch</div>
-  <div class="sec-title">Let's build something<br>worth using</div>
+  <div class="sec-title">Let's build something<br>worth shipping</div>
   <div class="contact-wrap">
     <div class="contact-info">
-      <p>Have a project in mind? I'd love to hear about it. Whether it's a full Android app, an iOS product, or a mobile game — let's talk.</p>
+      <p>Have a project in mind? I build Android apps, mobile games, and full-stack products. Let's talk scope, timeline, and budget.</p>
       <div class="contact-badges">
         <div class="contact-badge"><em>✅</em> Available for freelance work</div>
         <div class="contact-badge"><em>🤝</em> Open to startup collaborations</div>
@@ -234,7 +222,7 @@
     <form class="contact-form" action="https://formspree.io/f/xdkogpqr" method="POST">
       <input type="text" name="name" placeholder="Your Name" required>
       <input type="email" name="email" placeholder="Your Email" required>
-      <textarea name="message" rows="5" placeholder="Tell me about your project..." required></textarea>
+      <textarea name="message" rows="5" placeholder="Tell me about your project (budget, timeline, platform)..." required></textarea>
       <button type="submit" class="btn btn-p" style="width:100%;justify-content:center">
         Send Message
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
@@ -259,22 +247,6 @@
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
   Hire Me
 </a>
-
-<!-- MODALS -->
-<div id="modal-featured" class="modal">
-  <div class="modal-box">
-    <button class="modal-close">&times;</button>
-    <h3>Offline Productivity Focus App</h3>
-    <div class="modal-stack"><span class="ms-pill">Flutter</span><span class="ms-pill">Firebase</span><span class="ms-pill">3 Weeks</span></div>
-    <div class="modal-sec"><b>Problem</b><p>Users complained existing focus apps had too many features, ads, and required internet. They just wanted a timer and task list that worked.</p></div>
-    <div class="modal-sec"><b>Solution</b><p>Built a lightweight Flutter app with local storage, offline-first architecture, 60fps animations, and dark mode by default.</p></div>
-    <div class="modal-sec"><b>Results</b><div class="modal-result"><p>⭐ 4.8 on Play Store test track<br>👥 1.2k active users in first month<br>🛡️ 0 crash reports</p></div></div>
-  </div>
-</div>
-
-
-
-
 
 <div class="toast" id="toast">✅ Message sent! I'll reply within 24 hours.</div>
 <script type="module" src="main.js"></script>

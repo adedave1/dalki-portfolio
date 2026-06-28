@@ -1,4 +1,3 @@
-
 // ============================================
 //  admin.js — Dalki Admin Dashboard
 // ============================================
@@ -17,6 +16,7 @@ const loginPassword  = document.getElementById("loginPassword");
 const loginError     = document.getElementById("loginError");
 const loginBtn       = document.getElementById("loginBtn");
 const loginSpinner   = document.getElementById("loginSpinner");
+const loginBtnText   = document.getElementById("loginBtnText");
 const pwToggle       = document.getElementById("pwToggle");
 const adminEmailEl   = document.getElementById("adminEmail");
 const logoutBtn      = document.getElementById("logoutBtn");
@@ -86,14 +86,18 @@ onAuthChange(user => {
 loginForm.addEventListener("submit", async e => {
   e.preventDefault();
   loginError.textContent = "";
+  loginError.classList.remove("show");
   loginBtn.disabled      = true;
   loginSpinner.classList.add("visible");
+  loginBtnText.textContent = "AUTHENTICATING...";
   try {
     await login(loginEmail.value.trim(), loginPassword.value);
   } catch (err) {
     loginError.textContent = friendlyAuthError(err.code);
+    loginError.classList.add("show");
     loginBtn.disabled      = false;
     loginSpinner.classList.remove("visible");
+    loginBtnText.textContent = "AUTHENTICATE";
   }
 });
 
@@ -103,7 +107,7 @@ logoutBtnMob && logoutBtnMob.addEventListener("click", () => logout());
 pwToggle.addEventListener("click", () => {
   const show = loginPassword.type === "password";
   loginPassword.type   = show ? "text" : "password";
-  pwToggle.textContent = show ? "Hide" : "Show";
+  pwToggle.textContent = show ? "HIDE" : "SHOW";
 });
 
 function friendlyAuthError(code) {
@@ -130,14 +134,63 @@ document.querySelectorAll(".nav-item").forEach(btn =>
   btn.addEventListener("click", () => goToPanel(btn.dataset.panel))
 );
 
+// ── MOBILE SIDEBAR ────────────────────────────
+function initMobileSidebar() {
+  // Create overlay if not exists
+  let overlay = document.querySelector(".mobile-sidebar-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.className = "mobile-sidebar-overlay";
+    document.body.appendChild(overlay);
+    
+    // Create hamburger if not exists
+    const topbar = document.querySelector(".mobile-topbar");
+    if (topbar && !document.querySelector(".sidebar-toggle")) {
+      const toggle = document.createElement("button");
+      toggle.className = "sidebar-toggle";
+      toggle.innerHTML = "☰";
+      toggle.style.cssText = "background:none;border:none;color:#E8EAF0;font-size:1.2rem;cursor:pointer;padding:0.2rem 0.5rem;";
+      topbar.insertBefore(toggle, topbar.firstChild);
+      
+      toggle.addEventListener("click", () => {
+        const sidebar = document.querySelector(".sidebar");
+        sidebar.style.display = sidebar.style.display === "flex" ? "none" : "flex";
+        sidebar.style.position = "fixed";
+        sidebar.style.zIndex = "100";
+        sidebar.style.height = "100vh";
+        overlay.classList.toggle("active");
+      });
+      
+      overlay.addEventListener("click", () => {
+        document.querySelector(".sidebar").style.display = "none";
+        overlay.classList.remove("active");
+      });
+    }
+  }
+}
+
+// ── SKELETON LOADING ──────────────────────────
+const SKELETON_ROW = `
+  <div class="skeleton-row">
+    <div class="skeleton-thumb"></div>
+    <div class="skeleton-text" style="width:70%"></div>
+    <div class="skeleton-text short" style="width:40%"></div>
+    <div class="skeleton-text tiny"></div>
+    <div style="display:flex;gap:0.5rem">
+      <div class="skeleton-text" style="width:45px;height:28px"></div>
+      <div class="skeleton-text" style="width:45px;height:28px"></div>
+    </div>
+  </div>
+`;
+
 // ── LOAD PROJECTS ─────────────────────────────
 async function loadProjects() {
-  projectList.innerHTML = `<div class="table-empty">Loading…</div>`;
+  projectList.innerHTML = Array(5).fill(SKELETON_ROW).join("");
   try {
     allProjects = await getProjects();
     renderTable();
   } catch (err) {
-    projectList.innerHTML = `<div class="table-empty">Error: ${err.message}</div>`;
+    projectList.innerHTML = `<div class="table-empty">Error: ${err.message} <button onclick="loadProjects()" style="background:none;border:1px solid var(--border);color:var(--accent);padding:0.5rem 1rem;border-radius:6px;margin-top:1rem;cursor:pointer;">Retry</button></div>`;
   }
 }
 
@@ -156,11 +209,13 @@ function renderTable() {
   }
 
   projectList.innerHTML = "";
-  allProjects.forEach(p => {
+  allProjects.forEach((p, index) => {
     const isLive = p.published === true || p.published === "true";
     const row    = document.createElement("div");
     row.className  = "project-row";
     row.dataset.id = p.id;
+    row.style.animationDelay = `${index * 0.05}s`;
+    row.style.animation = "fadeUp 0.4s ease both";
 
     row.innerHTML = `
       ${p.imageURL
@@ -187,12 +242,31 @@ function renderTable() {
 
 // ── TOGGLE STATUS ─────────────────────────────
 async function togglePublished(project) {
+  const btn = document.querySelector(`.toggle-status[data-id="${project.id}"]`);
+  if (!btn) return;
+  
+  // Animate transition
+  btn.style.transform = "scale(0.95)";
+  btn.style.opacity = "0.7";
+  
   const newStatus = !(project.published === true || project.published === "true");
   try {
     await updateProject(project.id, { published: newStatus });
+    
+    btn.style.transform = "scale(1)";
+    btn.style.opacity = "1";
+    
     showToast(newStatus ? "Project is now Live ✓" : "Project set to Draft");
-    await loadProjects();
+    
+    // Update local state without full reload
+    project.published = newStatus;
+    const isLive = newStatus;
+    btn.dataset.live = isLive;
+    btn.innerHTML = `<span class="status-dot ${isLive ? "live" : "draft"}"></span> ${isLive ? "Live" : "Draft"}`;
+    
   } catch (err) {
+    btn.style.transform = "scale(1)";
+    btn.style.opacity = "1";
     showToast("Failed to update: " + err.message, "error");
   }
 }
@@ -360,3 +434,33 @@ function resetForm() {
   saveBtn.disabled             = false;
 }
 
+// ── KEYBOARD SHORTCUTS ────────────────────────
+document.addEventListener("keydown", e => {
+  // Ctrl/Cmd + N = New Project
+  if ((e.ctrlKey || e.metaKey) && e.key === "n") {
+    e.preventDefault();
+    if (dashboard.style.display !== "none") {
+      btnNewProject.click();
+    }
+  }
+  
+  // Escape = close modals, cancel edit
+  if (e.key === "Escape") {
+    if (deleteModal.style.display === "flex") {
+      cancelDelete.click();
+    } else if (document.getElementById("panel-upload").classList.contains("active") && !editId.value) {
+      btnCancel.click();
+    }
+  }
+  
+  // Ctrl/Cmd + S = Save form (when in upload panel)
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+    if (document.getElementById("panel-upload").classList.contains("active")) {
+      e.preventDefault();
+      uploadForm.dispatchEvent(new Event("submit"));
+    }
+  }
+});
+
+// ── INIT ─────────────────────────────────────
+initMobileSidebar();

@@ -60,25 +60,130 @@ function initModals() {
   });
 }
 
+// ── Skeleton Templates ─────────────────────
+const SKELETON_CARD = `
+  <div class="project-card skeleton-card">
+    <div class="skeleton-img"></div>
+    <div class="skeleton-body">
+      <div class="skeleton-tag"></div>
+      <div class="skeleton-title"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+    </div>
+  </div>
+`;
+
+const SKELETON_FEATURED = `
+  <div class="feat-img skeleton-bg">
+    <div class="skeleton-feat-img"></div>
+  </div>
+  <div class="feat-txt">
+    <div class="skeleton-tag" style="width:120px"></div>
+    <div class="skeleton-title" style="width:80%;margin:12px 0"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line short"></div>
+  </div>
+`;
+
+// ── Dynamic Featured Project ───────────────
+async function loadFeatured() {
+  const wrap = document.getElementById('featured-wrap');
+  if (!wrap) return;
+
+  try {
+    const projects = await getProjects();
+    const published = projects.filter(p => p.published === true || p.published === 'true');
+    
+    // Sort by updatedAt desc, fallback to createdAt
+    published.sort((a, b) => {
+      const aTime = b.updatedAt?.toMillis?.() || b.updatedAt || 0;
+      const bTime = a.updatedAt?.toMillis?.() || a.updatedAt || 0;
+      return bTime - aTime;
+    });
+
+    const p = published[0];
+
+    if (!p) {
+      // Fallback static featured
+      wrap.innerHTML = `
+        <div class="feat-img">
+          <div class="feat-ph">🎯</div>
+        </div>
+        <div class="feat-txt">
+          <div class="feat-tag">★ Flagship Project</div>
+          <div class="feat-title">GlassChat</div>
+          <p class="feat-desc">A premium glassmorphism messaging app with Fog Privacy, Time Capsule messages, and WebRTC voice/video calls.</p>
+          <div class="feat-meta">
+            <div class="meta-item"><b>Problem it solves</b><p>Existing chat apps are cluttered and privacy-invasive. Users want clean, ephemeral messaging.</p></div>
+            <div class="meta-item"><b>What I built</b><p>Native Android app with Jetpack Compose, Supabase backend, Firebase Cloud Messaging, and WebRTC.</p></div>
+            <div class="meta-item"><b>Results</b><p>Full feature set implemented · Play Store-ready · Custom privacy controls</p></div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const tags = (p.tags || []).map(t => `<span class="ms-pill">${t}</span>`).join('');
+    const hasCaseStudy = p.problem || p.solution || p.results;
+
+    wrap.innerHTML = `
+      <div class="feat-img">
+        ${p.imageURL
+          ? `<img src="${p.imageURL}" alt="${p.title}" loading="eager"/>`
+          : `<div class="feat-ph">${CATEGORY_EMOJI[p.category] || '📱'}</div>`}
+      </div>
+      <div class="feat-txt">
+        <div class="feat-tag">★ Flagship Project</div>
+        <div class="feat-title">${p.title}</div>
+        <p class="feat-desc">${p.description || ''}</p>
+        <div class="feat-meta">
+          ${p.problem ? `<div class="meta-item"><b>Problem it solves</b><p>${p.problem}</p></div>` : ''}
+          ${p.solution ? `<div class="meta-item"><b>What I built</b><p>${p.solution}</p></div>` : ''}
+          ${p.results ? `<div class="meta-item"><b>Results</b><p>${p.results}</p></div>` : ''}
+        </div>
+        ${tags ? `<div class="modal-stack" style="margin-bottom:20px">${tags}</div>` : ''}
+        ${hasCaseStudy ? `<button class="case-btn dyn-case-btn">
+          View Full Case Study
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>` : ''}
+      </div>
+    `;
+
+    if (hasCaseStudy) {
+      wrap.querySelector('.dyn-case-btn').addEventListener('click', () => openDynModal(p));
+    }
+
+  } catch (err) {
+    wrap.innerHTML = `<div class="feat-loading">Couldn't load featured project</div>`;
+    console.error(err);
+  }
+}
+
 // ── Dynamic Projects ───────────────────────
 const CATEGORY_LABELS = {
-  game: 'Game', product: 'Product', android: 'Android', ios: 'iOS', flutter: 'Flutter'
+  game: 'Game', product: 'Product', ui: 'UI / Design', other: 'Other',
+  android: 'Android', ios: 'iOS', flutter: 'Flutter'
 };
 
 const CATEGORY_EMOJI = {
-  game: '🎮', product: '📦', android: '🤖', ios: '🍎', flutter: '🐦'
+  game: '🎮', product: '📦', ui: '🎨', other: '📱',
+  android: '🤖', ios: '🍎', flutter: '🐦'
 };
 
 async function loadProjects() {
   const container = document.getElementById('dynamic-projects');
   if (!container) return;
 
+  // Show skeletons first
+  container.innerHTML = Array(6).fill(SKELETON_CARD).join('');
+
   try {
     const projects = await getProjects();
     const published = projects.filter(p => p.published === true || p.published === 'true');
 
     if (published.length === 0) {
-      container.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px 0">No projects yet.</div>';
+      container.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px 0">No projects yet. Check back soon.</div>';
       return;
     }
 
@@ -111,7 +216,6 @@ async function loadProjects() {
         </div>
       `;
 
-      // Case study modal trigger
       if (hasCaseStudy) {
         card.querySelector('.dyn-case-btn').addEventListener('click', () => openDynModal(p));
       }
@@ -119,10 +223,7 @@ async function loadProjects() {
       container.appendChild(card);
     });
 
-    // Re-init filters
     initFilters();
-
-    // Observe new cards
     container.querySelectorAll('.project-card').forEach(el => obs.observe(el));
 
   } catch (err) {
@@ -139,23 +240,14 @@ function openDynModal(p) {
 
   const tags = (p.tags || []).map(t => `<span class="ms-pill">${t}</span>`).join('');
   
-  // Parse caseStudy field (supports plain text or Problem/Solution/Results format)
   let body = '';
-  const text = p.caseStudy || '';
-  const hasSections = /problem:|solution:|results:/i.test(text);
-
-  if (hasSections) {
-    const lines = text.split('\n').filter(l => l.trim());
-    lines.forEach(line => {
-      const match = line.match(/^(problem|solution|results):\s*(.*)/i);
-      if (match) {
-        body += `<div class="modal-sec"><b>${match[1]}</b><p>${match[2]}</p></div>`;
-      } else {
-        body += `<div class="modal-sec"><p>${line}</p></div>`;
-      }
-    });
-  } else {
-    body = `<div class="modal-sec"><p>${text.replace(/\n/g, '<br>')}</p></div>`;
+  if (p.problem) body += `<div class="modal-sec"><b>Problem</b><p>${p.problem}</p></div>`;
+  if (p.solution) body += `<div class="modal-sec"><b>Solution</b><p>${p.solution}</p></div>`;
+  if (p.results) body += `<div class="modal-sec"><b>Results</b><div class="modal-result"><p>${p.results}</p></div></div>`;
+  
+  // Fallback to caseStudy field if structured fields aren't present
+  if (!body && p.caseStudy) {
+    body = `<div class="modal-sec"><p>${p.caseStudy.replace(/\n/g, '<br>')}</p></div>`;
   }
 
   dynModal = document.createElement('div');
@@ -164,8 +256,8 @@ function openDynModal(p) {
     <div class="modal-box">
       <button class="modal-close">&times;</button>
       <h3>${p.title}</h3>
-      <div class="modal-stack">${tags}</div>
-      ${body}
+      ${tags ? `<div class="modal-stack">${tags}</div>` : ''}
+      ${body || '<div class="modal-sec"><p>No detailed case study available.</p></div>'}
     </div>
   `;
 
@@ -212,4 +304,5 @@ if (contactForm) {
 
 // ── Init ───────────────────────────────────
 initModals();
+loadFeatured();
 loadProjects();

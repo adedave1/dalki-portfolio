@@ -5,50 +5,475 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Dalki</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='28' fill='%23050505'/%3E%3Crect x='25' y='25' width='50' height='50' rx='14' fill='none' stroke='%23fff' stroke-width='2' opacity='0.9'/%3E%3Crect x='35' y='35' width='30' height='30' rx='8' fill='%23fff' opacity='0.95'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="admin.css">
+<style>
+/* ============================================
+   PRISM STAGE — Prism Lock + Stage Haze
+   ============================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --glass-1: rgba(255,255,255,0.03);
+  --glass-2: rgba(255,255,255,0.06);
+  --glass-3: rgba(255,255,255,0.10);
+  --glass-border: rgba(255,255,255,0.08);
+  --accent: #fff;
+  --accent-dim: rgba(255,255,255,0.5);
+  --text: #fff;
+  --text-dim: rgba(255,255,255,0.35);
+  --error: #ff6b6b;
+  --bg: #020202;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+}
+
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  perspective: 1200px;
+}
+
+/* ---- STAGE CANVAS (behind everything) ---- */
+#stageCanvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+/* ---- PRISM CARD ---- */
+.prism-card {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 400px;
+  padding: 48px 40px;
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+  animation: cardPhase 1.2s cubic-bezier(0.22,1,0.36,1) 0.3s both;
+}
+
+@keyframes cardPhase {
+  from { opacity: 0; transform: translateY(40px) scale(0.92); filter: blur(10px) brightness(2); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(1); }
+}
+
+/* Glass layers */
+.prism-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 32px;
+  pointer-events: none;
+  transition: transform 0.3s ease-out;
+}
+
+.layer-1 {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  backdrop-filter: blur(60px);
+  border: 1px solid var(--glass-border);
+  transform: translateZ(0px);
+}
+
+.layer-2 {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 30px;
+  inset: 8px;
+  transform: translateZ(20px);
+}
+
+.layer-3 {
+  background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.08) 0%, transparent 50%);
+  inset: 16px;
+  border-radius: 24px;
+  transform: translateZ(40px);
+  overflow: hidden;
+}
+
+/* Caustic light inside glass */
+.caustics {
+  position: absolute;
+  inset: -50%;
+  background: 
+    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(255,255,255,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 80% at 80% 60%, rgba(255,255,255,0.03) 0%, transparent 50%);
+  animation: causticShift 12s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes causticShift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -20px) rotate(5deg); }
+  66% { transform: translate(-20px, 30px) rotate(-3deg); }
+}
+
+/* ---- CONTENT ---- */
+.prism-content {
+  position: relative;
+  z-index: 10;
+  transform: translateZ(60px);
+}
+
+/* Logo */
+.logo-wrap {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo-mark {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
+  position: relative;
+}
+
+.logo-mark::before,
+.logo-mark::after {
+  content: '';
+  position: absolute;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.9);
+}
+
+.logo-mark::before {
+  inset: 0;
+  animation: markPulse 3s ease-in-out infinite;
+}
+
+.logo-mark::after {
+  inset: 12px;
+  background: rgba(255,255,255,0.95);
+  border: none;
+  animation: markPulse 3s ease-in-out infinite 0.5s;
+}
+
+@keyframes markPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+.logo-text {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--text);
+}
+
+.logo-text span {
+  font-weight: 300;
+  opacity: 0.4;
+}
+
+.logo-sub {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 8px;
+  font-weight: 400;
+}
+
+/* ---- FORM ---- */
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.form-group:focus-within .form-label {
+  color: var(--accent);
+}
+
+.form-input {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  color: var(--text);
+  padding: 16px 18px;
+  outline: none;
+  transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  position: relative;
+}
+
+.form-input::placeholder {
+  color: rgba(255,255,255,0.15);
+  font-weight: 300;
+}
+
+.form-input:hover {
+  border-color: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+}
+
+.form-input:focus {
+  border-color: rgba(255,255,255,0.25);
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.02), 0 0 40px rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.06);
+  text-shadow: -0.5px 0 rgba(255,100,100,0.3), 0.5px 0 rgba(100,100,255,0.3);
+}
+
+/* Magnetic input underline */
+.form-group::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.22,1,0.36,1), left 0.6s;
+  opacity: 0;
+}
+
+.form-group:focus-within::after {
+  width: 60%;
+  left: 20%;
+  opacity: 1;
+}
+
+.pw-wrap { position: relative; }
+.pw-wrap .form-input { padding-right: 70px; }
+
+.pw-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  transition: all 0.2s;
+  font-weight: 500;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 8px 14px;
+}
+
+.pw-toggle:hover {
+  color: var(--accent);
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.form-error {
+  font-size: 12px;
+  color: var(--error);
+  min-height: 20px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+
+.form-error.show { opacity: 1; }
+
+/* ---- HOLOGRAPHIC BUTTON ---- */
+.btn-prism {
+  width: 100%;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+  margin-top: 4px;
+}
+
+.btn-prism::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.15) 55%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.btn-prism:hover::before {
+  transform: translateX(100%);
+}
+
+.btn-prism:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+}
+
+.btn-prism:active {
+  transform: scale(0.98);
+  animation: strobe 0.1s ease;
+}
+
+@keyframes strobe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.btn-prism:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-prism:disabled::before { display: none; }
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  display: none;
+  animation: spin 0.7s linear infinite;
+  margin-right: 8px;
+}
+
+.btn-spinner.visible { display: inline-block; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- REFLECTION ---- */
+.prism-reflection {
+  position: absolute;
+  bottom: -60%;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.03), transparent);
+  border-radius: 32px;
+  transform: scaleY(-1);
+  filter: blur(20px);
+  opacity: 0.3;
+  pointer-events: none;
+  mask: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
+  -webkit-mask: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
+}
+
+/* ---- DASHBOARD ---- */
+.dashboard { display: none; }
+
+/* Mobile */
+@media (max-width: 480px) {
+  .prism-card {
+    width: 90vw;
+    padding: 36px 28px;
+  }
+  .prism-layer { border-radius: 24px; }
+  .layer-2 { border-radius: 22px; }
+  .layer-3 { border-radius: 18px; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .prism-card, .logo-mark::before, .logo-mark::after, .caustics {
+    animation: none;
+  }
+  .prism-card {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+</style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div class="login-screen" id="loginScreen">
-  <div class="login-card">
-    <div class="login-logo">Dal<span>ki</span></div>
-    <div class="login-tagline">ADMIN DASHBOARD</div>
-    <form class="login-form" id="loginForm">
-      <div class="field-group">
-        <label>Email</label>
-        <input type="email" id="loginEmail" placeholder="you@email.com" required autocomplete="email">
+  <canvas id="stageCanvas"></canvas>
+  
+  <div class="prism-card" id="prismCard">
+    <div class="prism-layer layer-1"></div>
+    <div class="prism-layer layer-2"></div>
+    <div class="prism-layer layer-3">
+      <div class="caustics"></div>
+    </div>
+    
+    <div class="prism-content">
+      <div class="logo-wrap">
+        <div class="logo-mark"></div>
+        <div class="logo-text">Dal<span>ki</span></div>
+        <div class="logo-sub">Secure Access</div>
       </div>
-      <div class="field-group">
-        <label>Password</label>
-        <div class="pw-wrap">
-          <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
-          <button type="button" class="pw-toggle" id="pwToggle">Show</button>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Identity</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="your@email.com" required autocomplete="email">
         </div>
-      </div>
-      <div class="login-error" id="loginError"></div>
-      <button type="submit" class="btn-login" id="loginBtn">
-        <span id="loginSpinner" class="btn-spinner"></span>
-        Sign In
-      </button>
-    </form>
+        
+        <div class="form-group">
+          <label class="form-label">Passkey</label>
+          <div class="pw-wrap">
+            <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="pw-toggle" id="pwToggle">Show</button>
+          </div>
+        </div>
+        
+        <div class="form-error" id="loginError"></div>
+        
+        <button type="submit" class="btn-prism" id="loginBtn">
+          <span class="btn-spinner" id="loginSpinner"></span>
+          <span id="loginBtnText">Authenticate</span>
+        </button>
+      </form>
+    </div>
+    
+    <div class="prism-reflection"></div>
   </div>
 </div>
 
 <!-- DASHBOARD -->
 <div class="dashboard" id="dashboard" style="display:none">
-
-  <!-- Mobile topbar -->
   <div class="mobile-topbar">
     <div class="mobile-topbar-logo">Dal<span>ki</span></div>
     <button class="btn-mobile-logout" id="logoutBtnMobile">Sign out</button>
   </div>
-
   <div class="dashboard-body">
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-logo">Dal<span>ki</span></div>
       <nav class="sidebar-nav">
@@ -65,11 +490,7 @@
         <button class="btn-logout" id="logoutBtn">Sign out</button>
       </div>
     </aside>
-
-    <!-- Main -->
     <main class="main">
-
-      <!-- Projects Panel -->
       <div class="panel active" id="panel-projects">
         <div class="panel-header">
           <div>
@@ -89,8 +510,6 @@
           <div id="projectList"></div>
         </div>
       </div>
-
-      <!-- Upload Panel -->
       <div class="panel" id="panel-upload">
         <div class="panel-header">
           <div>
@@ -98,11 +517,8 @@
             <div class="panel-sub">Fill in the details below</div>
           </div>
         </div>
-
         <form class="upload-form" id="uploadForm">
           <input type="hidden" id="editId">
-
-          <!-- Image drop zone -->
           <div class="drop-zone" id="dropZone">
             <div class="drop-inner" id="dropInner">
               <div class="drop-icon">🖼️</div>
@@ -115,14 +531,10 @@
             </div>
           </div>
           <input type="file" id="fileInput" accept="image/*" style="display:none">
-
-          <!-- Progress -->
           <div class="upload-progress" id="uploadProgress">
             <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
             <span class="progress-label" id="progressLabel">0%</span>
           </div>
-
-          <!-- Fields -->
           <div class="form-grid">
             <div class="field-group">
               <label>Project Title *</label>
@@ -166,9 +578,7 @@
               </select>
             </div>
           </div>
-
           <div class="form-error" id="formError"></div>
-
           <div class="form-actions">
             <button type="submit" class="btn-save" id="saveBtn">
               <span id="saveBtnLabel">Save project</span>
@@ -177,7 +587,6 @@
           </div>
         </form>
       </div>
-
     </main>
   </div>
 </div>
@@ -198,5 +607,234 @@
 <div class="toast" id="toast"></div>
 
 <script type="module" src="admin.js"></script>
+
+<!-- PRISM STAGE ENGINE -->
+<script>
+(function(){
+  // ---- STAGE LIGHTING ----
+  const canvas = document.getElementById('stageCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, dpr = Math.min(window.devicePixelRatio, 2);
+  
+  function resize(){
+    w = canvas.width = canvas.clientWidth * dpr;
+    h = canvas.height = canvas.clientHeight * dpr;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  
+  let mouseX = w/2, mouseY = h/2;
+  let targetX = w/2, targetY = h/2;
+  
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    targetX = (e.clientX - rect.left) * dpr;
+    targetY = (e.clientY - rect.top) * dpr;
+  });
+  
+  canvas.addEventListener('mouseleave', () => {
+    targetX = w/2;
+    targetY = h/2;
+  });
+  
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    targetX = (e.touches[0].clientX - rect.left) * dpr;
+    targetY = (e.touches[0].clientY - rect.top) * dpr;
+  });
+  
+  const lights = [
+    { angle: 0, speed: 0.3, color: [255, 50, 100], width: 0.3, reach: 0.8, offset: 0 },
+    { angle: 2.1, speed: 0.25, color: [50, 100, 255], width: 0.4, reach: 0.9, offset: 1.5 },
+    { angle: 4.2, speed: 0.35, color: [100, 255, 150], width: 0.25, reach: 0.7, offset: 3 },
+    { angle: 1.0, speed: -0.2, color: [255, 200, 50], width: 0.35, reach: 0.6, offset: 2 },
+    { angle: 3.5, speed: 0.4, color: [200, 50, 255], width: 0.2, reach: 0.85, offset: 4.5 },
+  ];
+  
+  const particleCount = 800;
+  const particles = [];
+  for(let i=0; i<particleCount; i++){
+    particles.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random()-0.5) * 0.3,
+      vy: (Math.random()-0.5) * 0.3 - 0.1,
+      size: Math.random() * 2 + 0.5,
+      alpha: Math.random() * 0.5 + 0.1,
+      twinkle: Math.random() * Math.PI * 2
+    });
+  }
+  
+  let time = 0;
+  let animId;
+  
+  function drawBeam(light, cx, cy){
+    const cos = Math.cos(light.angle);
+    const sin = Math.sin(light.angle);
+    const beamLen = Math.max(w, h) * light.reach;
+    
+    const ox = cx - cos * beamLen * 0.3;
+    const oy = cy - sin * beamLen * 0.3;
+    const ex = cx + cos * beamLen;
+    const ey = cy + sin * beamLen;
+    
+    const px = -sin * beamLen * light.width;
+    const py = cos * beamLen * light.width;
+    
+    const grad = ctx.createLinearGradient(ox, oy, ex, ey);
+    grad.addColorStop(0, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0)`);
+    grad.addColorStop(0.3, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0.03)`);
+    grad.addColorStop(0.6, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0.08)`);
+    grad.addColorStop(0.85, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0.15)`);
+    grad.addColorStop(1, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0)`);
+    
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(ox + px * 0.1, oy + py * 0.1);
+    ctx.lineTo(ex + px, ey + py);
+    ctx.lineTo(ex - px, ey - py);
+    ctx.lineTo(ox - px * 0.1, oy - py * 0.1);
+    ctx.closePath();
+    ctx.fill();
+    
+    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, beamLen * 0.4);
+    coreGrad.addColorStop(0, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0.1)`);
+    coreGrad.addColorStop(0.5, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0.03)`);
+    coreGrad.addColorStop(1, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0)`);
+    
+    ctx.fillStyle = coreGrad;
+    ctx.fillRect(0, 0, w, h);
+  }
+  
+  function animate(){
+    time += 0.016;
+    mouseX += (targetX - mouseX) * 0.05;
+    mouseY += (targetY - mouseY) * 0.05;
+    
+    ctx.fillStyle = 'rgba(2,2,2,0.3)';
+    ctx.fillRect(0, 0, w, h);
+    
+    lights.forEach(light => {
+      light.angle += light.speed * 0.016;
+      light.angle += Math.sin(time * 0.5 + light.offset) * 0.001;
+    });
+    
+    lights.forEach(light => drawBeam(light, mouseX, mouseY));
+    drawBeam({...lights[0], angle: lights[0].angle + Math.PI, speed: 0}, w * 0.1, h * 0.9);
+    drawBeam({...lights[2], angle: lights[2].angle + Math.PI * 0.7, speed: 0}, w * 0.9, h * 0.85);
+    
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.twinkle += 0.02;
+      
+      if(p.x < 0) p.x = w;
+      if(p.x > w) p.x = 0;
+      if(p.y < 0) p.y = h;
+      if(p.y > h) p.y = 0;
+      
+      let inBeam = false;
+      let beamColor = [255,255,255];
+      let beamIntensity = 0;
+      
+      lights.forEach(light => {
+        const dx = p.x - mouseX;
+        const dy = p.y - mouseY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const beamAngle = Math.atan2(dy, dx);
+        const angleDiff = Math.abs(beamAngle - light.angle);
+        const normalizedDiff = Math.min(angleDiff, Math.PI * 2 - angleDiff);
+        
+        if(normalizedDiff < light.width && dist < Math.max(w,h) * light.reach * 0.7){
+          inBeam = true;
+          beamColor = light.color;
+          beamIntensity = 1 - (normalizedDiff / light.width);
+        }
+      });
+      
+      const alpha = inBeam ? p.alpha * (0.3 + beamIntensity * 0.7) : p.alpha * 0.15;
+      const r = inBeam ? beamColor[0] : 200;
+      const g = inBeam ? beamColor[1] : 200;
+      const b = inBeam ? beamColor[2] : 220;
+      
+      ctx.fillStyle = `rgba(${r},${g},${b},${alpha * (0.5 + Math.sin(p.twinkle) * 0.5)})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * (inBeam ? 1.5 : 1), 0, Math.PI * 2);
+      ctx.fill();
+    });
+    
+    const vig = ctx.createRadialGradient(w/2, h/2, w * 0.3, w/2, h/2, w * 0.7);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.6)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, w, h);
+    
+    animId = requestAnimationFrame(animate);
+  }
+  animate();
+  
+  // Cleanup
+  const observer = new MutationObserver(muts => {
+    muts.forEach(m => {
+      if(m.target.id === 'loginScreen' && m.target.style.display === 'none'){
+        cancelAnimationFrame(animId);
+        observer.disconnect();
+      }
+    });
+  });
+  observer.observe(document.getElementById('loginScreen'), {attributes:true, attributeFilter:['style']});
+  
+  // ---- PRISM 3D TILT ----
+  const card = document.getElementById('prismCard');
+  const screen = document.getElementById('loginScreen');
+  if(!card || !screen) return;
+  
+  let bounds;
+  
+  function rotateToMouse(e){
+    bounds = card.getBoundingClientRect();
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    const leftX = mouseX - bounds.x;
+    const topY = mouseY - bounds.y;
+    const center = {
+      x: leftX - bounds.width / 2,
+      y: topY - bounds.height / 2
+    };
+    const distance = Math.sqrt(center.x**2 + center.y**2);
+    
+    card.style.transform = `
+      perspective(1000px)
+      rotate3d(
+        ${-center.y / 100},
+        ${center.x / 100},
+        0,
+        ${Math.log(distance) * 0.5}deg
+      )
+      translateZ(10px)
+    `;
+    
+    const layers = card.querySelectorAll('.prism-layer');
+    layers.forEach((layer, i) => {
+      const depth = (i + 1) * 8;
+      layer.style.transform = `translateZ(${depth}px) translate(${center.x / (depth * 2)}px, ${center.y / (depth * 2)}px)`;
+    });
+  }
+  
+  screen.addEventListener('mousemove', rotateToMouse);
+  
+  screen.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(1000px) rotate3d(0,0,0,0deg) translateZ(0)';
+    const layers = card.querySelectorAll('.prism-layer');
+    layers.forEach(layer => {
+      layer.style.transform = layer.classList.contains('layer-1') ? 'translateZ(0px)' :
+                              layer.classList.contains('layer-2') ? 'translateZ(20px)' :
+                              'translateZ(40px)';
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
