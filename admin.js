@@ -3,7 +3,7 @@
 // ============================================
 
 import {
-  getProjects, addProject, updateProject, deleteProject,
+  getItems, addItem, updateItem, deleteItem,
   uploadImage, login, logout, onAuthChange,
 } from "./firebase.js";
 
@@ -45,6 +45,8 @@ const fieldDescription  = document.getElementById("fieldDescription");
 const fieldProblem      = document.getElementById("fieldProblem");
 const fieldSolution     = document.getElementById("fieldSolution");
 const fieldResults      = document.getElementById("fieldResults");
+const fieldDownload     = document.getElementById("fieldDownload");
+const fieldSite         = document.getElementById("fieldSite");
 const fieldTags         = document.getElementById("fieldTags");
 const fieldPublished    = document.getElementById("fieldPublished");
 const saveBtn           = document.getElementById("saveBtn");
@@ -61,7 +63,7 @@ const toast          = document.getElementById("toast");
 let selectedFile     = null;
 let existingImageURL = null;
 let pendingDeleteId  = null;
-let allProjects      = [];
+let allItems      = [];
 
 // ── TOAST ─────────────────────────────────────
 function showToast(msg, type = "success") {
@@ -187,7 +189,7 @@ const SKELETON_ROW = `
 async function loadProjects() {
   projectList.innerHTML = Array(5).fill(SKELETON_ROW).join("");
   try {
-    allProjects = await getProjects();
+    allItems = await getItems();
     renderTable();
   } catch (err) {
     projectList.innerHTML = `<div class="table-empty">Error: ${err.message} <button onclick="loadProjects()" style="background:none;border:1px solid var(--border);color:var(--accent);padding:0.5rem 1rem;border-radius:6px;margin-top:1rem;cursor:pointer;">Retry</button></div>`;
@@ -195,7 +197,7 @@ async function loadProjects() {
 }
 
 function renderTable() {
-  const count = allProjects.length;
+  const count = allItems.length;
   projectCount.textContent = count === 0 ? "No projects yet" : `${count} project${count !== 1 ? "s" : ""}`;
 
   if (navBadge) {
@@ -209,7 +211,7 @@ function renderTable() {
   }
 
   projectList.innerHTML = "";
-  allProjects.forEach((p, index) => {
+  allItems.forEach((p, index) => {
     const isLive = p.published === true || p.published === "true";
     const row    = document.createElement("div");
     row.className  = "project-row";
@@ -251,7 +253,7 @@ async function togglePublished(project) {
   
   const newStatus = !(project.published === true || project.published === "true");
   try {
-    await updateProject(project.id, { published: newStatus });
+    await updateItem(project.id, { published: newStatus });
     
     btn.style.transform = "scale(1)";
     btn.style.opacity = "1";
@@ -290,6 +292,8 @@ function openEdit(project) {
   fieldProblem.value       = project.problem     || "";
   fieldSolution.value      = project.solution    || "";
   fieldResults.value       = project.results     || "";
+  fieldDownload.value      = project.downloadURL || "";
+  fieldSite.value          = project.siteURL     || "";
   fieldTags.value          = (project.tags || []).join(", ");
   fieldPublished.value     = String(project.published ?? "true");
 
@@ -303,7 +307,7 @@ function openEdit(project) {
   goToPanel("upload");
 }
 
-btnCancel.addEventListener("click", () => { resetForm(); goToPanel("projects"); });
+btnCancel.addEventListener("click", () => { resetForm(); goToPanel("items"); });
 
 // ── DROP ZONE ─────────────────────────────────
 dropInner.addEventListener("click", () => fileInput.click());
@@ -379,16 +383,16 @@ uploadForm.addEventListener("submit", async e => {
 
     const id = editId.value;
     if (id) {
-      await updateProject(id, data);
+      await updateItem(id, data);
       showToast("Project updated ✓");
     } else {
-      await addProject(data);
+      await addItem(data);
       showToast("Project added ✓");
     }
 
     resetForm();
     await loadProjects();
-    goToPanel("projects");
+    goToPanel("items");
 
   } catch (err) {
     formError.textContent = "Error: " + err.message;
@@ -408,7 +412,7 @@ confirmDelete.addEventListener("click", async () => {
   if (!pendingDeleteId) return;
   deleteModal.style.display = "none";
   try {
-    await deleteProject(pendingDeleteId);
+    await deleteItem(pendingDeleteId);
     showToast("Project deleted.");
     pendingDeleteId = null;
     await loadProjects();

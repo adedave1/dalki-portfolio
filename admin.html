@@ -477,7 +477,7 @@ body {
     <aside class="sidebar">
       <div class="sidebar-logo">Dal<span>ki</span></div>
       <nav class="sidebar-nav">
-        <button class="nav-item active" data-panel="projects">
+        <button class="nav-item active" data-panel="items">
           <span class="nav-icon">📁</span> Projects
           <span class="nav-badge" id="navBadge" style="display:none"></span>
         </button>
@@ -491,7 +491,7 @@ body {
       </div>
     </aside>
     <main class="main">
-      <div class="panel active" id="panel-projects">
+      <div class="panel active" id="panel-items">
         <div class="panel-header">
           <div>
             <div class="panel-title">Projects</div>
@@ -545,8 +545,8 @@ body {
               <select id="fieldCategory" required>
                 <option value="">Select category…</option>
                 <option value="game">Game</option>
-                <option value="product">Product</option>
-                <option value="ui">UI / Design</option>
+                <option value="app">App</option>
+                <option value="website">Website</option>
                 <option value="other">Other</option>
               </select>
             </div>
@@ -565,6 +565,14 @@ body {
             <div class="field-group field-group--full">
               <label>Results <span class="label-hint">Key outcomes</span></label>
               <textarea id="fieldResults" rows="2" placeholder="e.g. 4.8★ on Play Store · 1.2k users in month 1"></textarea>
+            </div>
+            <div class="field-group field-group--full">
+              <label>Download Link <span class="label-hint">Mediafire or any direct link</span></label>
+              <input type="url" id="fieldDownload" placeholder="https://mediafire.com/…">
+            </div>
+            <div class="field-group field-group--full">
+              <label>Website URL <span class="label-hint">For websites only</span></label>
+              <input type="url" id="fieldSite" placeholder="https://yourapp.web.app">
             </div>
             <div class="field-group field-group--full">
               <label>Tech Stack <span class="label-hint">comma separated</span></label>
