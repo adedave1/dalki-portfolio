@@ -95,7 +95,7 @@ loginForm.addEventListener("submit", async e => {
   try {
     await login(loginEmail.value.trim(), loginPassword.value);
   } catch (err) {
-    loginError.textContent = friendlyAuthError(err.code);
+    loginError.textContent = err.code + " — " + err.message;
     loginError.classList.add("show");
     loginBtn.disabled      = false;
     loginSpinner.classList.remove("visible");
