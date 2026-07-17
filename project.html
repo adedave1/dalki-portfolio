@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project — Dalki</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="/" class="nav-logo">Dalki</a>
+  <div class="nav-links">
+    <a href="/" class="nav-link">Browse</a>
+    <a href="https://wa.me/2347088832722?text=Hi%20Dalki" target="_blank" rel="noopener" class="nav-link">Contact</a>
+  </div>
+  <div class="nav-user">
+    <a href="/admin.html" class="nav-btn secondary">Admin</a>
+  </div>
+</nav>
+
+<!-- PROJECT HERO -->
+<div class="project-hero">
+  <div class="project-hero-cover" id="projectHeroCover">
+    <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--bg-3),var(--bg-2));display:flex;align-items:center;justify-content:center;font-size:80px">📦</div>
+  </div>
+  <div class="project-hero-info">
+    <div class="project-icon" id="projectIcon">
+      <div class="project-icon-ph">📦</div>
+    </div>
+    <div class="project-hero-text">
+      <div class="project-hero-cat" id="projectCat">Loading…</div>
+      <h1 class="project-hero-title" id="projectTitle">Loading…</h1>
+      <div class="project-hero-meta">
+        <span id="projectAuthor">by Dalki</span>
+        <span>·</span>
+        <span id="projectStatus">Released</span>
+        <span>·</span>
+        <span>⬇ <span id="statDownloads">0</span></span>
+        <span>·</span>
+        <span>👁 <span id="statViews">0</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIONS BAR -->
+<div class="project-actions-bar">
+  <button class="btn-download-lg" id="btnDownload" style="display:none">
+    ⬇ Download
+  </button>
+  <a class="btn-visit-lg" id="btnVisit" style="display:none" target="_blank" rel="noopener">
+    🌐 Visit Website
+  </a>
+  <button class="btn-ghost" id="btnShare" style="margin-left:auto">
+    🔗 Share
+  </button>
+</div>
+
+<!-- CONTENT -->
+<div class="project-content">
+  <div class="project-main">
+
+    <!-- Screenshots -->
+    <div class="content-block" id="blockScreenshots" style="display:none">
+      <h3>Screenshots</h3>
+      <div class="screenshot-carousel" id="screenshotCarousel"></div>
+    </div>
+
+    <!-- About -->
+    <div class="content-block">
+      <h3>About this project</h3>
+      <div class="rich-content" id="projectDescription">Loading description…</div>
+    </div>
+
+    <!-- Problem -->
+    <div class="content-block" id="blockProblem" style="display:none">
+      <h3>Problem</h3>
+      <p id="projectProblem"></p>
+    </div>
+
+    <!-- Solution -->
+    <div class="content-block" id="blockSolution" style="display:none">
+      <h3>What I Built</h3>
+      <p id="projectSolution"></p>
+    </div>
+
+    <!-- Results -->
+    <div class="content-block" id="blockResults" style="display:none">
+      <h3>Results</h3>
+      <p id="projectResults"></p>
+    </div>
+
+    <!-- Video -->
+    <div class="content-block" id="blockVideo" style="display:none">
+      <h3>Trailer</h3>
+      <div id="videoEmbed" style="border-radius:var(--r);overflow:hidden;aspect-ratio:16/9;background:var(--bg-3)"></div>
+    </div>
+
+    <!-- Similar -->
+    <div class="content-block" id="blockSimilar" style="display:none">
+      <h3>More like this</h3>
+      <div class="similar-grid" id="similarGrid"></div>
+    </div>
+
+  </div>
+
+  <div class="project-side">
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div class="info-card-title">Information</div>
+      <div class="info-row">
+        <span class="info-row-label">Category</span>
+        <span class="info-row-value" id="infoCategory">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-row-label">Genre</span>
+        <span class="info-row-value" id="infoGenre">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-row-label">Release Status</span>
+        <span class="info-row-value" id="infoStatus">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-row-label">Downloads</span>
+        <span class="info-row-value" id="infoDownloads">—</span>
+      </div>
+      <div class="info-row" id="infoTagsRow" style="display:none">
+        <span class="info-row-label">Tags</span>
+        <span class="info-row-value" id="infoTags" style="display:flex;gap:4px;flex-wrap:wrap"></span>
+      </div>
+    </div>
+
+    <!-- Store Links -->
+    <div class="info-card" id="cardStores" style="display:none">
+      <div class="info-card-title">Also available on</div>
+      <div style="display:flex;flex-direction:column;gap:8px" id="storeLinks"></div>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="info-card" id="cardTech" style="display:none">
+      <div class="info-card-title">Built with</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" id="techTags"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- COMMENTS -->
+<div class="comment-section" id="commentSection" style="display:none">
+  <div class="container-narrow">
+    <h3 style="font-family:var(--ff-h);font-size:20px;font-weight:700;margin-bottom:24px">Comments</h3>
+    <div class="comment-form" id="commentForm">
+      <div class="nav-avatar" style="background:linear-gradient(135deg,var(--cyan),var(--purple))">G</div>
+      <div style="flex:1">
+        <textarea id="commentInput" placeholder="Write a comment…"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px">
+          <button class="btn-primary" id="btnPostComment" style="padding:10px 24px;font-size:13px">Post Comment</button>
+        </div>
+      </div>
+    </div>
+    <div class="comment-list" id="commentList">
+      <p style="color:var(--text-3);text-align:center;padding:40px">No comments yet. Be the first!</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">Dalki</div>
+    <p class="footer-copy">© 2026 Dalki. Built with passion in Nigeria.</p>
+  </div>
+</footer>
+
+<!-- Lightbox -->
+<div class="modal-overlay" id="lightbox" style="display:none">
+  <div style="position:relative;max-width:90%;max-height:90%">
+    <img id="lightboxImg" src="" alt="" style="max-width:100%;max-height:90vh;border-radius:var(--r);box-shadow:var(--shadow-lg)">
+    <button id="lightboxClose" style="position:absolute;top:-40px;right:0;color:#fff;font-size:24px;background:none;border:none;cursor:pointer">✕</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script type="module" src="project.js"></script>
+</body>
+</html>

@@ -3,610 +3,407 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — Dalki</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='28' fill='%23050505'/%3E%3Crect x='25' y='25' width='50' height='50' rx='14' fill='none' stroke='%23fff' stroke-width='2' opacity='0.9'/%3E%3Crect x='35' y='35' width='30' height='30' rx='8' fill='%23fff' opacity='0.95'/%3E%3C/svg%3E">
+<title>Admin — Dalki</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="admin.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <style>
-/* ============================================
-   PRISM STAGE — Prism Lock + Stage Haze
-   ============================================ */
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-  --glass-1: rgba(255,255,255,0.03);
-  --glass-2: rgba(255,255,255,0.06);
-  --glass-3: rgba(255,255,255,0.10);
-  --glass-border: rgba(255,255,255,0.08);
-  --accent: #fff;
-  --accent-dim: rgba(255,255,255,0.5);
-  --text: #fff;
-  --text-dim: rgba(255,255,255,0.35);
-  --error: #ff6b6b;
-  --bg: #020202;
+/* Admin-specific additions */
+.admin-login-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);position:relative;overflow:hidden;
+}
+.admin-login-screen::before{
+  content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:600px;
+  background:radial-gradient(ellipse,rgba(0,212,255,0.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.admin-login-card{
+  width:100%;max-width:400px;background:var(--bg-2);
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:40px;position:relative;z-index:1;
+}
+.admin-login-logo{
+  font-family:var(--ff-h);font-size:28px;font-weight:700;
+  letter-spacing:-1px;margin-bottom:4px;text-align:center;
+}
+.admin-login-logo span{color:var(--cyan)}
+.admin-login-sub{
+  font-size:13px;color:var(--text-3);text-align:center;margin-bottom:32px;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  overflow: hidden;
-  height: 100vh;
+.filter-pill{
+  padding:6px 16px;border-radius:20px;font-size:13px;font-weight:500;
+  color:var(--text-2);background:transparent;border:1px solid var(--border);
+  transition:0.15s;cursor:pointer;
 }
-
-.login-screen {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  perspective: 1200px;
-}
-
-/* ---- STAGE CANVAS (behind everything) ---- */
-#stageCanvas {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  cursor: crosshair;
-}
-
-/* ---- PRISM CARD ---- */
-.prism-card {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 400px;
-  padding: 48px 40px;
-  transform-style: preserve-3d;
-  transition: transform 0.1s ease-out;
-  animation: cardPhase 1.2s cubic-bezier(0.22,1,0.36,1) 0.3s both;
-}
-
-@keyframes cardPhase {
-  from { opacity: 0; transform: translateY(40px) scale(0.92); filter: blur(10px) brightness(2); }
-  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(1); }
-}
-
-/* Glass layers */
-.prism-layer {
-  position: absolute;
-  inset: 0;
-  border-radius: 32px;
-  pointer-events: none;
-  transition: transform 0.3s ease-out;
-}
-
-.layer-1 {
-  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-  backdrop-filter: blur(60px);
-  border: 1px solid var(--glass-border);
-  transform: translateZ(0px);
-}
-
-.layer-2 {
-  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 60%);
-  border: 1px solid rgba(255,255,255,0.04);
-  border-radius: 30px;
-  inset: 8px;
-  transform: translateZ(20px);
-}
-
-.layer-3 {
-  background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.08) 0%, transparent 50%);
-  inset: 16px;
-  border-radius: 24px;
-  transform: translateZ(40px);
-  overflow: hidden;
-}
-
-/* Caustic light inside glass */
-.caustics {
-  position: absolute;
-  inset: -50%;
-  background: 
-    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(255,255,255,0.04) 0%, transparent 50%),
-    radial-gradient(ellipse 60% 80% at 80% 60%, rgba(255,255,255,0.03) 0%, transparent 50%);
-  animation: causticShift 12s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes causticShift {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(30px, -20px) rotate(5deg); }
-  66% { transform: translate(-20px, 30px) rotate(-3deg); }
-}
-
-/* ---- CONTENT ---- */
-.prism-content {
-  position: relative;
-  z-index: 10;
-  transform: translateZ(60px);
-}
-
-/* Logo */
-.logo-wrap {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.logo-mark {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 20px;
-  position: relative;
-}
-
-.logo-mark::before,
-.logo-mark::after {
-  content: '';
-  position: absolute;
-  border-radius: 14px;
-  border: 2px solid rgba(255,255,255,0.9);
-}
-
-.logo-mark::before {
-  inset: 0;
-  animation: markPulse 3s ease-in-out infinite;
-}
-
-.logo-mark::after {
-  inset: 12px;
-  background: rgba(255,255,255,0.95);
-  border: none;
-  animation: markPulse 3s ease-in-out infinite 0.5s;
-}
-
-@keyframes markPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
-}
-
-.logo-text {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -1px;
-  color: var(--text);
-}
-
-.logo-text span {
-  font-weight: 300;
-  opacity: 0.4;
-}
-
-.logo-sub {
-  font-size: 11px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-top: 8px;
-  font-weight: 400;
-}
-
-/* ---- FORM ---- */
-.form-group {
-  margin-bottom: 20px;
-  position: relative;
-}
-
-.form-label {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 10px;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-.form-group:focus-within .form-label {
-  color: var(--accent);
-}
-
-.form-input {
-  width: 100%;
-  background: rgba(255,255,255,0.03);
-  border: 1.5px solid rgba(255,255,255,0.06);
-  border-radius: 16px;
-  color: var(--text);
-  padding: 16px 18px;
-  outline: none;
-  transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  position: relative;
-}
-
-.form-input::placeholder {
-  color: rgba(255,255,255,0.15);
-  font-weight: 300;
-}
-
-.form-input:hover {
-  border-color: rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-}
-
-.form-input:focus {
-  border-color: rgba(255,255,255,0.25);
-  box-shadow: 0 0 0 4px rgba(255,255,255,0.02), 0 0 40px rgba(255,255,255,0.05);
-  background: rgba(255,255,255,0.06);
-  text-shadow: -0.5px 0 rgba(255,100,100,0.3), 0.5px 0 rgba(100,100,255,0.3);
-}
-
-/* Magnetic input underline */
-.form-group::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  border-radius: 2px;
-  transition: width 0.6s cubic-bezier(0.22,1,0.36,1), left 0.6s;
-  opacity: 0;
-}
-
-.form-group:focus-within::after {
-  width: 60%;
-  left: 20%;
-  opacity: 1;
-}
-
-.pw-wrap { position: relative; }
-.pw-wrap .form-input { padding-right: 70px; }
-
-.pw-toggle {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  transition: all 0.2s;
-  font-weight: 500;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  cursor: pointer;
-  padding: 8px 14px;
-}
-
-.pw-toggle:hover {
-  color: var(--accent);
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.15);
-}
-
-.form-error {
-  font-size: 12px;
-  color: var(--error);
-  min-height: 20px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: -8px;
-  margin-bottom: 8px;
-}
-
-.form-error.show { opacity: 1; }
-
-/* ---- HOLOGRAPHIC BUTTON ---- */
-.btn-prism {
-  width: 100%;
-  padding: 18px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
-  color: var(--text);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
-  margin-top: 4px;
-}
-
-.btn-prism::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.15) 55%, transparent 60%);
-  transform: translateX(-100%);
-  transition: transform 0.6s ease;
-}
-
-.btn-prism:hover::before {
-  transform: translateX(100%);
-}
-
-.btn-prism:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.2);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
-}
-
-.btn-prism:active {
-  transform: scale(0.98);
-  animation: strobe 0.1s ease;
-}
-
-@keyframes strobe {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.btn-prism:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-prism:disabled::before { display: none; }
-
-.btn-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255,255,255,0.2);
-  border-top-color: #fff;
-  border-radius: 50%;
-  display: none;
-  animation: spin 0.7s linear infinite;
-  margin-right: 8px;
-}
-
-.btn-spinner.visible { display: inline-block; }
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ---- REFLECTION ---- */
-.prism-reflection {
-  position: absolute;
-  bottom: -60%;
-  left: 0;
-  right: 0;
-  height: 60%;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.03), transparent);
-  border-radius: 32px;
-  transform: scaleY(-1);
-  filter: blur(20px);
-  opacity: 0.3;
-  pointer-events: none;
-  mask: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
-  -webkit-mask: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
-}
-
-/* ---- DASHBOARD ---- */
-.dashboard { display: none; }
-
-/* Mobile */
-@media (max-width: 480px) {
-  .prism-card {
-    width: 90vw;
-    padding: 36px 28px;
-  }
-  .prism-layer { border-radius: 24px; }
-  .layer-2 { border-radius: 22px; }
-  .layer-3 { border-radius: 18px; }
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .prism-card, .logo-mark::before, .logo-mark::after, .caustics {
-    animation: none;
-  }
-  .prism-card {
-    opacity: 1;
-    transform: none;
-    filter: none;
-  }
-}
+.filter-pill:hover{color:var(--text);background:var(--surface)}
+.filter-pill.active{background:var(--cyan);color:var(--bg);border-color:var(--cyan)}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="login-screen" id="loginScreen">
-  <canvas id="stageCanvas"></canvas>
-  
-  <div class="prism-card" id="prismCard">
-    <div class="prism-layer layer-1"></div>
-    <div class="prism-layer layer-2"></div>
-    <div class="prism-layer layer-3">
-      <div class="caustics"></div>
-    </div>
-    
-    <div class="prism-content">
-      <div class="logo-wrap">
-        <div class="logo-mark"></div>
-        <div class="logo-text">Dal<span>ki</span></div>
-        <div class="logo-sub">Secure Access</div>
+<!-- LOGIN SCREEN -->
+<div class="admin-login-screen" id="loginScreen">
+  <div class="admin-login-card">
+    <div class="admin-login-logo">Dal<span>ki</span></div>
+    <div class="admin-login-sub">Secure Admin Access</div>
+    <form id="loginForm" style="display:flex;flex-direction:column;gap:16px">
+      <div style="padding:10px 14px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:var(--r);font-size:13px;color:var(--red);display:none" id="loginError"></div>
+      <div class="form-group">
+        <label class="form-label" style="color:var(--text-2)">Email</label>
+        <input type="email" class="form-input-dark" id="loginEmail" placeholder="admin@dalki.com" required>
       </div>
-      
-      <form id="loginForm">
-        <div class="form-group">
-          <label class="form-label">Identity</label>
-          <input type="email" class="form-input" id="loginEmail" placeholder="your@email.com" required autocomplete="email">
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Passkey</label>
-          <div class="pw-wrap">
-            <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
-            <button type="button" class="pw-toggle" id="pwToggle">Show</button>
-          </div>
-        </div>
-        
-        <div class="form-error" id="loginError"></div>
-        
-        <button type="submit" class="btn-prism" id="loginBtn">
-          <span class="btn-spinner" id="loginSpinner"></span>
-          <span id="loginBtnText">Authenticate</span>
-        </button>
-      </form>
-    </div>
-    
-    <div class="prism-reflection"></div>
+      <div class="form-group">
+        <label class="form-label" style="color:var(--text-2)">Password</label>
+        <input type="password" class="form-input-dark" id="loginPassword" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn-primary" id="loginBtn" style="margin-top:8px">
+        <span id="loginBtnText">Authenticate</span>
+      </button>
+    </form>
   </div>
 </div>
 
 <!-- DASHBOARD -->
-<div class="dashboard" id="dashboard" style="display:none">
-  <div class="mobile-topbar">
-    <div class="mobile-topbar-logo">Dal<span>ki</span></div>
-    <button class="btn-mobile-logout" id="logoutBtnMobile">Sign out</button>
-  </div>
-  <div class="dashboard-body">
-    <aside class="sidebar">
-      <div class="sidebar-logo">Dal<span>ki</span></div>
-      <nav class="sidebar-nav">
-        <button class="nav-item active" data-panel="items">
-          <span class="nav-icon">📁</span> Projects
-          <span class="nav-badge" id="navBadge" style="display:none"></span>
-        </button>
-        <button class="nav-item" data-panel="upload">
-          <span class="nav-icon">➕</span> New Project
-        </button>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="admin-email" id="adminEmail"></div>
-        <button class="btn-logout" id="logoutBtn">Sign out</button>
+<div class="admin-body" id="dashboard" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-logo">Dal<span>ki</span></div>
+    <nav class="admin-nav">
+      <button class="admin-nav-item active" data-panel="projects">
+        📁 Projects <span class="admin-nav-badge" id="navBadge" style="display:none">0</span>
+      </button>
+      <button class="admin-nav-item" data-panel="create">
+        ➕ New Project
+      </button>
+    </nav>
+    <div style="padding:16px 24px;border-top:1px solid var(--border);margin-top:auto">
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:8px" id="adminEmail"></div>
+      <button class="admin-nav-item" id="logoutBtn" style="padding:8px 0;color:var(--red)">🚪 Sign out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+
+    <!-- Projects Panel -->
+    <div class="panel active" id="panel-projects">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px">
+        <div>
+          <h1 style="font-family:var(--ff-h);font-size:28px;font-weight:700;letter-spacing:-0.5px">Projects</h1>
+          <p style="color:var(--text-3);font-size:14px;margin-top:4px" id="projectCount">Loading…</p>
+        </div>
+        <button class="nav-btn" id="btnNewProject">+ New Project</button>
       </div>
-    </aside>
-    <main class="main">
-      <div class="panel active" id="panel-items">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">Projects</div>
-            <div class="panel-sub" id="projectCount">Loading…</div>
-          </div>
-          <button class="btn-new" id="btnNewProject">+ New Project</button>
+
+      <div class="admin-table" id="projectTable">
+        <div class="admin-table-row header">
+          <span></span>
+          <span>Project</span>
+          <span>Category</span>
+          <span>Status</span>
+          <span>Actions</span>
         </div>
-        <div class="project-table-wrap">
-          <div class="project-table-head">
-            <span></span>
-            <span>Title</span>
-            <span>Category</span>
-            <span>Status</span>
-            <span>Actions</span>
+        <div id="projectList">
+          <div class="loading" style="grid-column:1/-1;padding:40px">
+            <div class="spinner" style="width:32px;height:32px;border-color:var(--border);border-top-color:var(--cyan)"></div>
+            <p>Loading projects…</p>
           </div>
-          <div id="projectList"></div>
         </div>
       </div>
-      <div class="panel" id="panel-upload">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title" id="uploadPanelTitle">New Project</div>
-            <div class="panel-sub">Fill in the details below</div>
+
+      <div class="empty" id="emptyProjects" style="display:none">
+        <div class="empty-icon">📭</div>
+        <p>No projects yet. Create your first one!</p>
+        <button class="nav-btn" id="btnEmptyNew" style="margin-top:16px">+ New Project</button>
+      </div>
+    </div>
+
+    <!-- Create/Edit Panel -->
+    <div class="panel" id="panel-create">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px">
+        <div>
+          <h1 style="font-family:var(--ff-h);font-size:28px;font-weight:700;letter-spacing:-0.5px" id="formTitle">New Project</h1>
+          <p style="color:var(--text-3);font-size:14px;margin-top:4px">Fill in the details below to publish your project.</p>
+        </div>
+        <button class="nav-btn secondary" id="btnBackToList">← Back to Projects</button>
+      </div>
+
+      <form id="createForm">
+        <input type="hidden" id="editId">
+
+        <!-- Basic Info -->
+        <div class="admin-section">
+          <div class="admin-section-title">Basic Information</div>
+          <div class="admin-section-desc">The essentials that help people find your project.</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Project Title *</label>
+              <input type="text" class="form-input-dark" id="fieldTitle" placeholder="e.g. MrSudoku" required>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Project URL Slug <span style="font-size:11px;color:var(--text-3)">Auto-generated from title</span></label>
+              <input type="text" class="form-input-dark" id="fieldSlug" placeholder="your-project-name" readonly style="background:var(--bg);color:var(--text-3)">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Short Description <span style="font-size:11px;color:var(--text-3)">Shown in cards and search results</span></label>
+              <input type="text" class="form-input-dark" id="fieldShortDesc" placeholder="A brief one-line description" maxlength="160">
+            </div>
           </div>
         </div>
-        <form class="upload-form" id="uploadForm">
-          <input type="hidden" id="editId">
-          <div class="drop-zone" id="dropZone">
-            <div class="drop-inner" id="dropInner">
-              <div class="drop-icon">🖼️</div>
-              <div class="drop-label">Click or drag image here</div>
-              <div class="drop-sub">PNG, JPG, WEBP — max 10MB</div>
-            </div>
-            <div class="drop-preview" id="dropPreview">
-              <img id="previewImg" src="" alt="Preview">
-              <button type="button" class="preview-remove" id="removeImg">✕</button>
-            </div>
+
+        <!-- Cover Image -->
+        <div class="admin-section">
+          <div class="admin-section-title">Cover Image</div>
+          <div class="admin-section-desc">Used for project cards and page header. Required. Recommended: 630×500.</div>
+
+          <div class="upload-zone-dark" id="coverZone">
+            <div style="font-size:32px;margin-bottom:8px">🖼️</div>
+            <div style="font-size:14px;font-weight:500;color:var(--text)">Click or drag image here</div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:4px">PNG, JPG, WEBP — max 10MB</div>
           </div>
-          <input type="file" id="fileInput" accept="image/*" style="display:none">
-          <div class="upload-progress" id="uploadProgress">
-            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-            <span class="progress-label" id="progressLabel">0%</span>
+          <input type="file" id="coverInput" accept="image/*" style="display:none">
+          <div class="upload-preview" id="coverPreview" style="display:none;margin-top:12px">
+            <img id="coverPreviewImg" src="" alt="Cover" style="width:100%;border-radius:var(--r)">
+            <button type="button" class="upload-preview-remove" id="removeCover">✕</button>
           </div>
-          <div class="form-grid">
-            <div class="field-group">
-              <label>Project Title *</label>
-              <input type="text" id="fieldTitle" placeholder="e.g. MrSudoku" required>
+          <div id="coverProgress" style="display:none;margin-top:12px;align-items:center;gap:12px">
+            <div style="flex:1;height:4px;background:var(--bg);border-radius:2px;overflow:hidden">
+              <div id="coverProgressBar" style="height:100%;background:var(--cyan);width:0%;transition:width 0.2s"></div>
             </div>
-            <div class="field-group">
-              <label>Category *</label>
-              <select id="fieldCategory" required>
+            <span id="coverProgressText" style="font-size:12px;color:var(--text-3);min-width:40px;text-align:right">0%</span>
+          </div>
+        </div>
+
+        <!-- Classification -->
+        <div class="admin-section">
+          <div class="admin-section-title">Classification</div>
+          <div class="admin-section-desc">What are you uploading?</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select class="form-select-dark" id="fieldCategory" required>
                 <option value="">Select category…</option>
-                <option value="game">Game</option>
-                <option value="app">App</option>
-                <option value="website">Website</option>
-                <option value="other">Other</option>
+                <option value="game">Game — A piece of software you can play</option>
+                <option value="app">App — A tool or utility</option>
+                <option value="website">Website — A web-based project</option>
+                <option value="tool">Tool — A development or productivity tool</option>
+                <option value="other">Other — Something else</option>
               </select>
             </div>
-            <div class="field-group field-group--full">
-              <label>Description</label>
-              <textarea id="fieldDescription" rows="3" placeholder="Short description shown on the project card…"></textarea>
-            </div>
-            <div class="field-group field-group--full">
-              <label>Problem <span class="label-hint">What problem does it solve?</span></label>
-              <textarea id="fieldProblem" rows="2" placeholder="e.g. Existing apps were too cluttered…"></textarea>
-            </div>
-            <div class="field-group field-group--full">
-              <label>What I Built <span class="label-hint">What did you build?</span></label>
-              <textarea id="fieldSolution" rows="2" placeholder="e.g. Native Android app with custom keyboard…"></textarea>
-            </div>
-            <div class="field-group field-group--full">
-              <label>Results <span class="label-hint">Key outcomes</span></label>
-              <textarea id="fieldResults" rows="2" placeholder="e.g. 4.8★ on Play Store · 1.2k users in month 1"></textarea>
-            </div>
-            <div class="field-group field-group--full">
-              <label>Download Link <span class="label-hint">Mediafire or any direct link</span></label>
-              <input type="url" id="fieldDownload" placeholder="https://mediafire.com/…">
-            </div>
-            <div class="field-group field-group--full">
-              <label>Website URL <span class="label-hint">For websites only</span></label>
-              <input type="url" id="fieldSite" placeholder="https://yourapp.web.app">
-            </div>
-            <div class="field-group field-group--full">
-              <label>Tech Stack <span class="label-hint">comma separated</span></label>
-              <input type="text" id="fieldTags" placeholder="e.g. Kotlin, Room DB, 2 Weeks">
-            </div>
-            <div class="field-group">
-              <label>Status</label>
-              <select id="fieldPublished">
-                <option value="true">Live (visible on site)</option>
-                <option value="false">Draft (hidden)</option>
+            <div class="form-group">
+              <label class="form-label">Genre <span style="font-size:11px;color:var(--text-3)">Optional</span></label>
+              <select class="form-select-dark" id="fieldGenre">
+                <option value="">No genre</option>
+                <option value="action">Action</option>
+                <option value="adventure">Adventure</option>
+                <option value="puzzle">Puzzle</option>
+                <option value="rpg">RPG</option>
+                <option value="simulation">Simulation</option>
+                <option value="strategy">Strategy</option>
+                <option value="platformer">Platformer</option>
+                <option value="shooter">Shooter</option>
+                <option value="racing">Racing</option>
+                <option value="sports">Sports</option>
+                <option value="educational">Educational</option>
+                <option value="utility">Utility</option>
+                <option value="productivity">Productivity</option>
+                <option value="social">Social</option>
               </select>
             </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Tags <span style="font-size:11px;color:var(--text-3)">Max 10. Comma separated.</span></label>
+              <input type="text" class="form-input-dark" id="fieldTags" placeholder="e.g. android, kotlin, puzzle, offline">
+            </div>
           </div>
-          <div class="form-error" id="formError"></div>
-          <div class="form-actions">
-            <button type="submit" class="btn-save" id="saveBtn">
-              <span id="saveBtnLabel">Save project</span>
-            </button>
-            <button type="button" class="btn-cancel" id="btnCancel">Cancel</button>
+        </div>
+
+        <!-- Release Status -->
+        <div class="admin-section">
+          <div class="admin-section-title">Release Status</div>
+          <div class="radio-dark">
+            <div class="radio-dark-item selected" data-value="released">
+              <input type="radio" name="releaseStatus" value="released" id="rsReleased" checked style="accent-color:var(--cyan)">
+              <label for="rsReleased"><strong>Released</strong><span>Project is complete, but might receive some updates</span></label>
+            </div>
+            <div class="radio-dark-item" data-value="in-dev">
+              <input type="radio" name="releaseStatus" value="in-dev" id="rsInDev">
+              <label for="rsInDev"><strong>In Development</strong><span>Project is actively being worked on</span></label>
+            </div>
+            <div class="radio-dark-item" data-value="prototype">
+              <input type="radio" name="releaseStatus" value="prototype" id="rsPrototype">
+              <label for="rsPrototype"><strong>Prototype</strong><span>Early version to test concepts</span></label>
+            </div>
+            <div class="radio-dark-item" data-value="beta">
+              <input type="radio" name="releaseStatus" value="beta" id="rsBeta">
+              <label for="rsBeta"><strong>Beta</strong><span>Nearly complete, needs testing</span></label>
+            </div>
           </div>
-        </form>
-      </div>
-    </main>
-  </div>
+        </div>
+
+        <!-- Links -->
+        <div class="admin-section">
+          <div class="admin-section-title">Links</div>
+          <div class="admin-section-desc">Where people can download or visit your project.</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Download Link <span style="font-size:11px;color:var(--text-3)">Mediafire or any direct link</span></label>
+              <input type="url" class="form-input-dark" id="fieldDownload" placeholder="https://mediafire.com/…">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Website URL <span style="font-size:11px;color:var(--text-3)">For websites only</span></label>
+              <input type="url" class="form-input-dark" id="fieldSite" placeholder="https://yourapp.web.app">
+            </div>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="admin-section">
+          <div class="admin-section-title">Details</div>
+          <div class="admin-section-desc">This will make up the content of your project page.</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Description</label>
+              <div class="rich-editor-dark">
+                <div class="rich-toolbar-dark">
+                  <button type="button" data-cmd="bold"><b>B</b></button>
+                  <button type="button" data-cmd="italic"><i>I</i></button>
+                  <button type="button" data-cmd="underline"><u>U</u></button>
+                  <button type="button" data-cmd="strikeThrough"><s>S</s></button>
+                  <span style="width:1px;height:20px;background:var(--border);margin:0 4px"></span>
+                  <button type="button" data-cmd="insertUnorderedList">• List</button>
+                  <button type="button" data-cmd="insertOrderedList">1. List</button>
+                  <span style="width:1px;height:20px;background:var(--border);margin:0 4px"></span>
+                  <button type="button" data-cmd="createLink">🔗 Link</button>
+                </div>
+                <div class="rich-content-dark" id="fieldDescription" contenteditable="true" data-placeholder="Describe your project in detail…"></div>
+              </div>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Problem <span style="font-size:11px;color:var(--text-3)">What problem does it solve?</span></label>
+              <textarea class="form-textarea-dark" id="fieldProblem" rows="3" placeholder="e.g. Existing apps were too cluttered…"></textarea>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">What I Built <span style="font-size:11px;color:var(--text-3)">What did you build?</span></label>
+              <textarea class="form-textarea-dark" id="fieldSolution" rows="3" placeholder="e.g. Native Android app with custom keyboard…"></textarea>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Results <span style="font-size:11px;color:var(--text-3)">Key outcomes</span></label>
+              <textarea class="form-textarea-dark" id="fieldResults" rows="3" placeholder="e.g. 4.8★ on Play Store · 1.2k users in month 1"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Screenshots -->
+        <div class="admin-section">
+          <div class="admin-section-title">Screenshots</div>
+          <div class="admin-section-desc">Upload 3 to 5 for best results. Optional but recommended.</div>
+
+          <div class="upload-zone-dark" id="screenshotZone">
+            <div style="font-size:32px;margin-bottom:8px">🖼️</div>
+            <div style="font-size:14px;font-weight:500;color:var(--text)">Add screenshots</div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:4px">PNG, JPG, WEBP — max 5MB each</div>
+          </div>
+          <input type="file" id="screenshotInput" accept="image/*" style="display:none" multiple>
+          <div class="screenshot-grid" id="screenshotPreviewGrid" style="margin-top:16px"></div>
+        </div>
+
+        <!-- Video -->
+        <div class="admin-section">
+          <div class="admin-section-title">Video Trailer</div>
+          <div class="admin-section-desc">YouTube or Vimeo link.</div>
+          <div class="form-group">
+            <input type="url" class="form-input-dark" id="fieldVideo" placeholder="https://www.youtube.com/watch?v=…">
+          </div>
+        </div>
+
+        <!-- Store Links -->
+        <div class="admin-section">
+          <div class="admin-section-title">App Store Links</div>
+          <div class="admin-section-desc">If your project is available on other stores.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:6px"><span>🎮</span> Steam</label>
+              <input type="url" class="form-input-dark" id="fieldSteam" placeholder="Steam URL">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:6px"><span>🍎</span> App Store</label>
+              <input type="url" class="form-input-dark" id="fieldAppStore" placeholder="App Store URL">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:6px"><span>🤖</span> Play Store</label>
+              <input type="url" class="form-input-dark" id="fieldPlayStore" placeholder="Play Store URL">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:6px"><span>📱</span> Amazon</label>
+              <input type="url" class="form-input-dark" id="fieldAmazon" placeholder="Amazon App Store URL">
+            </div>
+          </div>
+        </div>
+
+        <!-- Community -->
+        <div class="admin-section">
+          <div class="admin-section-title">Community</div>
+          <div class="radio-dark">
+            <div class="radio-dark-item" data-value="disabled">
+              <input type="radio" name="communityType" value="disabled" id="commDisabled">
+              <label for="commDisabled"><strong>Disabled</strong><span>No comments on this project</span></label>
+            </div>
+            <div class="radio-dark-item selected" data-value="comments">
+              <input type="radio" name="communityType" value="comments" id="commComments" checked>
+              <label for="commComments"><strong>Comments</strong><span>Allow nested comments on the project page</span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visibility -->
+        <div class="admin-section">
+          <div class="admin-section-title">Visibility</div>
+          <div class="radio-dark">
+            <div class="radio-dark-item selected" data-value="draft">
+              <input type="radio" name="visibility" value="draft" id="visDraft" checked>
+              <label for="visDraft"><strong>Draft</strong><span>Only you can see this project</span></label>
+            </div>
+            <div class="radio-dark-item" data-value="public">
+              <input type="radio" name="visibility" value="public" id="visPublic">
+              <label for="visPublic"><strong>Public</strong><span>Anyone can view and download</span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div style="padding:12px 16px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:var(--r);font-size:13px;color:var(--red);display:none;margin-bottom:16px" id="formError"></div>
+
+        <!-- Actions -->
+        <div style="display:flex;gap:12px;justify-content:flex-end;padding-top:16px;border-top:1px solid var(--border)">
+          <button type="button" class="nav-btn secondary" id="btnCancel">Cancel</button>
+          <button type="submit" class="nav-btn" id="btnSave">
+            <span id="saveBtnText">Save Project</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
 </div>
 
 <!-- Delete Modal -->
-<div class="modal-overlay" id="deleteModal" style="display:none">
-  <div class="modal">
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
     <div class="modal-title">Delete project?</div>
-    <div class="modal-body">This will permanently remove the project from your portfolio. This cannot be undone.</div>
+    <div class="modal-text">This will permanently remove the project and all associated data. This cannot be undone.</div>
     <div class="modal-actions">
-      <button class="btn-cancel" id="cancelDelete">Cancel</button>
-      <button class="btn-delete-confirm" id="confirmDelete">Delete</button>
+      <button class="nav-btn secondary" id="cancelDelete">Cancel</button>
+      <button class="nav-btn" id="confirmDelete" style="background:var(--red)">Delete</button>
     </div>
   </div>
 </div>
@@ -615,234 +412,5 @@ body {
 <div class="toast" id="toast"></div>
 
 <script type="module" src="admin.js"></script>
-
-<!-- PRISM STAGE ENGINE -->
-<script>
-(function(){
-  // ---- STAGE LIGHTING ----
-  const canvas = document.getElementById('stageCanvas');
-  const ctx = canvas.getContext('2d');
-  let w, h, dpr = Math.min(window.devicePixelRatio, 2);
-  
-  function resize(){
-    w = canvas.width = canvas.clientWidth * dpr;
-    h = canvas.height = canvas.clientHeight * dpr;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-  
-  let mouseX = w/2, mouseY = h/2;
-  let targetX = w/2, targetY = h/2;
-  
-  canvas.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    targetX = (e.clientX - rect.left) * dpr;
-    targetY = (e.clientY - rect.top) * dpr;
-  });
-  
-  canvas.addEventListener('mouseleave', () => {
-    targetX = w/2;
-    targetY = h/2;
-  });
-  
-  canvas.addEventListener('touchmove', e => {
-    e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    targetX = (e.touches[0].clientX - rect.left) * dpr;
-    targetY = (e.touches[0].clientY - rect.top) * dpr;
-  });
-  
-  const lights = [
-    { angle: 0, speed: 0.3, color: [255, 50, 100], width: 0.3, reach: 0.8, offset: 0 },
-    { angle: 2.1, speed: 0.25, color: [50, 100, 255], width: 0.4, reach: 0.9, offset: 1.5 },
-    { angle: 4.2, speed: 0.35, color: [100, 255, 150], width: 0.25, reach: 0.7, offset: 3 },
-    { angle: 1.0, speed: -0.2, color: [255, 200, 50], width: 0.35, reach: 0.6, offset: 2 },
-    { angle: 3.5, speed: 0.4, color: [200, 50, 255], width: 0.2, reach: 0.85, offset: 4.5 },
-  ];
-  
-  const particleCount = 800;
-  const particles = [];
-  for(let i=0; i<particleCount; i++){
-    particles.push({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random()-0.5) * 0.3,
-      vy: (Math.random()-0.5) * 0.3 - 0.1,
-      size: Math.random() * 2 + 0.5,
-      alpha: Math.random() * 0.5 + 0.1,
-      twinkle: Math.random() * Math.PI * 2
-    });
-  }
-  
-  let time = 0;
-  let animId;
-  
-  function drawBeam(light, cx, cy){
-    const cos = Math.cos(light.angle);
-    const sin = Math.sin(light.angle);
-    const beamLen = Math.max(w, h) * light.reach;
-    
-    const ox = cx - cos * beamLen * 0.3;
-    const oy = cy - sin * beamLen * 0.3;
-    const ex = cx + cos * beamLen;
-    const ey = cy + sin * beamLen;
-    
-    const px = -sin * beamLen * light.width;
-    const py = cos * beamLen * light.width;
-    
-    const grad = ctx.createLinearGradient(ox, oy, ex, ey);
-    grad.addColorStop(0, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0)`);
-    grad.addColorStop(0.3, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0.03)`);
-    grad.addColorStop(0.6, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0.08)`);
-    grad.addColorStop(0.85, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0.15)`);
-    grad.addColorStop(1, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0)`);
-    
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.moveTo(ox + px * 0.1, oy + py * 0.1);
-    ctx.lineTo(ex + px, ey + py);
-    ctx.lineTo(ex - px, ey - py);
-    ctx.lineTo(ox - px * 0.1, oy - py * 0.1);
-    ctx.closePath();
-    ctx.fill();
-    
-    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, beamLen * 0.4);
-    coreGrad.addColorStop(0, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0.1)`);
-    coreGrad.addColorStop(0.5, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0.03)`);
-    coreGrad.addColorStop(1, `rgba(${light.color[0]},${light.color[1]},${light.color[2]},0)`);
-    
-    ctx.fillStyle = coreGrad;
-    ctx.fillRect(0, 0, w, h);
-  }
-  
-  function animate(){
-    time += 0.016;
-    mouseX += (targetX - mouseX) * 0.05;
-    mouseY += (targetY - mouseY) * 0.05;
-    
-    ctx.fillStyle = 'rgba(2,2,2,0.3)';
-    ctx.fillRect(0, 0, w, h);
-    
-    lights.forEach(light => {
-      light.angle += light.speed * 0.016;
-      light.angle += Math.sin(time * 0.5 + light.offset) * 0.001;
-    });
-    
-    lights.forEach(light => drawBeam(light, mouseX, mouseY));
-    drawBeam({...lights[0], angle: lights[0].angle + Math.PI, speed: 0}, w * 0.1, h * 0.9);
-    drawBeam({...lights[2], angle: lights[2].angle + Math.PI * 0.7, speed: 0}, w * 0.9, h * 0.85);
-    
-    particles.forEach(p => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.twinkle += 0.02;
-      
-      if(p.x < 0) p.x = w;
-      if(p.x > w) p.x = 0;
-      if(p.y < 0) p.y = h;
-      if(p.y > h) p.y = 0;
-      
-      let inBeam = false;
-      let beamColor = [255,255,255];
-      let beamIntensity = 0;
-      
-      lights.forEach(light => {
-        const dx = p.x - mouseX;
-        const dy = p.y - mouseY;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        const beamAngle = Math.atan2(dy, dx);
-        const angleDiff = Math.abs(beamAngle - light.angle);
-        const normalizedDiff = Math.min(angleDiff, Math.PI * 2 - angleDiff);
-        
-        if(normalizedDiff < light.width && dist < Math.max(w,h) * light.reach * 0.7){
-          inBeam = true;
-          beamColor = light.color;
-          beamIntensity = 1 - (normalizedDiff / light.width);
-        }
-      });
-      
-      const alpha = inBeam ? p.alpha * (0.3 + beamIntensity * 0.7) : p.alpha * 0.15;
-      const r = inBeam ? beamColor[0] : 200;
-      const g = inBeam ? beamColor[1] : 200;
-      const b = inBeam ? beamColor[2] : 220;
-      
-      ctx.fillStyle = `rgba(${r},${g},${b},${alpha * (0.5 + Math.sin(p.twinkle) * 0.5)})`;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * (inBeam ? 1.5 : 1), 0, Math.PI * 2);
-      ctx.fill();
-    });
-    
-    const vig = ctx.createRadialGradient(w/2, h/2, w * 0.3, w/2, h/2, w * 0.7);
-    vig.addColorStop(0, 'rgba(0,0,0,0)');
-    vig.addColorStop(1, 'rgba(0,0,0,0.6)');
-    ctx.fillStyle = vig;
-    ctx.fillRect(0, 0, w, h);
-    
-    animId = requestAnimationFrame(animate);
-  }
-  animate();
-  
-  // Cleanup
-  const observer = new MutationObserver(muts => {
-    muts.forEach(m => {
-      if(m.target.id === 'loginScreen' && m.target.style.display === 'none'){
-        cancelAnimationFrame(animId);
-        observer.disconnect();
-      }
-    });
-  });
-  observer.observe(document.getElementById('loginScreen'), {attributes:true, attributeFilter:['style']});
-  
-  // ---- PRISM 3D TILT ----
-  const card = document.getElementById('prismCard');
-  const screen = document.getElementById('loginScreen');
-  if(!card || !screen) return;
-  
-  let bounds;
-  
-  function rotateToMouse(e){
-    bounds = card.getBoundingClientRect();
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-    const leftX = mouseX - bounds.x;
-    const topY = mouseY - bounds.y;
-    const center = {
-      x: leftX - bounds.width / 2,
-      y: topY - bounds.height / 2
-    };
-    const distance = Math.sqrt(center.x**2 + center.y**2);
-    
-    card.style.transform = `
-      perspective(1000px)
-      rotate3d(
-        ${-center.y / 100},
-        ${center.x / 100},
-        0,
-        ${Math.log(distance) * 0.5}deg
-      )
-      translateZ(10px)
-    `;
-    
-    const layers = card.querySelectorAll('.prism-layer');
-    layers.forEach((layer, i) => {
-      const depth = (i + 1) * 8;
-      layer.style.transform = `translateZ(${depth}px) translate(${center.x / (depth * 2)}px, ${center.y / (depth * 2)}px)`;
-    });
-  }
-  
-  screen.addEventListener('mousemove', rotateToMouse);
-  
-  screen.addEventListener('mouseleave', () => {
-    card.style.transform = 'perspective(1000px) rotate3d(0,0,0,0deg) translateZ(0)';
-    const layers = card.querySelectorAll('.prism-layer');
-    layers.forEach(layer => {
-      layer.style.transform = layer.classList.contains('layer-1') ? 'translateZ(0px)' :
-                              layer.classList.contains('layer-2') ? 'translateZ(20px)' :
-                              'translateZ(40px)';
-    });
-  });
-})();
-</script>
-
 </body>
 </html>

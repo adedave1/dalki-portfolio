@@ -3,23 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Dalki — Apps, games, and websites built by a mobile developer. Browse and download.">
-<meta property="og:title" content="Dalki — Download Hub">
-<meta property="og:description" content="Apps, games, and websites built by Dalki. Browse and download.">
-<title>Dalki — Download Hub</title>
+<meta name="description" content="Dalki — Discover indie games, apps, and websites. Download and play for free.">
+<meta property="og:title" content="Dalki — Indie Project Hub">
+<meta property="og:description" content="Discover and download indie games, apps, and websites built by passionate creators.">
+<title>Dalki — Discover Indie Projects</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- PARTICLES -->
+<canvas id="particlesCanvas"></canvas>
+
 <!-- NAV -->
-<nav class="nav" id="nav">
-  <a href="/" class="nav-logo">Dal<span>ki</span></a>
-  <div class="nav-right">
-    <a href="https://wa.me/2347088832722?text=Hi%20Dalki" target="_blank" rel="noopener" class="nav-contact">Contact</a>
+<nav class="nav">
+  <a href="/" class="nav-logo">Dalki</a>
+  <div class="nav-links">
+    <a href="/" class="nav-link active">Browse</a>
+    <a href="https://wa.me/2347088832722?text=Hi%20Dalki" target="_blank" rel="noopener" class="nav-link">Contact</a>
+  </div>
+  <div class="nav-user">
+    <a href="/admin.html" class="nav-btn secondary">Admin</a>
   </div>
 </nav>
 
@@ -27,71 +34,79 @@
 <header class="hero">
   <div class="hero-inner">
     <div class="hero-badge">
-      <span class="badge-dot"></span>
-      Indie developer · Nigeria
+      <span class="hero-badge-dot"></span>
+      Indie Developer · Nigeria
     </div>
-    <h1 class="hero-title">Everything<br><span class="hero-accent">I've built.</span></h1>
-    <p class="hero-sub">Apps, games, and websites — browse, download, and use them freely.</p>
+    <h1 class="hero-title">Everything<br>I've built.</h1>
+    <p class="hero-sub">Games, apps, and websites — browse, download, and use them freely. Built with passion by Dalki.</p>
     <div class="hero-stats">
-      <div class="stat"><span class="stat-num" id="statTotal">—</span><span class="stat-label">Projects</span></div>
-      <div class="stat-line"></div>
-      <div class="stat"><span class="stat-num" id="statApps">—</span><span class="stat-label">Apps & Games</span></div>
-      <div class="stat-line"></div>
-      <div class="stat"><span class="stat-num" id="statSites">—</span><span class="stat-label">Websites</span></div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" id="statTotal">—</div>
+        <div class="hero-stat-label">Projects</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" id="statGames">—</div>
+        <div class="hero-stat-label">Games</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" id="statApps">—</div>
+        <div class="hero-stat-label">Apps</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" id="statSites">—</div>
+        <div class="hero-stat-label">Websites</div>
+      </div>
     </div>
   </div>
+  <div class="scroll-indicator">Scroll to explore</div>
 </header>
 
-<!-- FILTER BAR -->
-<div class="filter-bar" id="filterBar">
-  <div class="filter-inner">
-    <button class="filter-tab active" data-filter="all">All</button>
-    <button class="filter-tab" data-filter="game">Games</button>
-    <button class="filter-tab" data-filter="app">Apps</button>
-    <button class="filter-tab" data-filter="website">Websites</button>
-  </div>
-</div>
-
-<!-- GRID -->
-<main class="main">
-  <div class="grid" id="grid">
-    <div class="grid-loading">
-      <div class="spinner"></div>
-      <p>Loading…</p>
+<!-- FEATURED -->
+<section style="padding:40px 0">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Featured <span>Projects</span></h2>
+      <a href="#all" class="section-link">View all →</a>
+    </div>
+    <div class="h-scroll" id="featuredRow">
+      <!-- Injected by JS -->
     </div>
   </div>
-  <div class="empty-state" id="emptyState" style="display:none">
-    <div class="empty-icon">📭</div>
-    <p>Nothing here yet.</p>
+</section>
+
+<!-- ALL PROJECTS -->
+<section id="all" style="padding:40px 0">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">All <span>Projects</span></h2>
+      <div style="display:flex;gap:8px">
+        <button class="filter-pill active" data-filter="all">All</button>
+        <button class="filter-pill" data-filter="game">Games</button>
+        <button class="filter-pill" data-filter="app">Apps</button>
+        <button class="filter-pill" data-filter="website">Websites</button>
+        <button class="filter-pill" data-filter="tool">Tools</button>
+      </div>
+    </div>
+    <div class="grid" id="grid">
+      <div class="loading" style="grid-column:1/-1">
+        <div class="spinner" style="width:32px;height:32px;border-color:var(--border);border-top-color:var(--cyan)"></div>
+        <p>Loading projects…</p>
+      </div>
+    </div>
+    <div class="empty" id="emptyState" style="display:none">
+      <div class="empty-icon">📭</div>
+      <p>No projects found in this category.</p>
+    </div>
   </div>
-</main>
+</section>
 
 <!-- FOOTER -->
 <footer class="footer">
   <div class="footer-inner">
-    <div class="footer-logo">Dal<span>ki</span></div>
+    <div class="footer-logo">Dalki</div>
     <p class="footer-copy">© 2026 Dalki. Built with passion in Nigeria.</p>
-    <a href="/admin.html" class="footer-admin">Admin</a>
   </div>
 </footer>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modal">
-    <button class="modal-close" id="modalClose">✕</button>
-    <div class="modal-img-wrap">
-      <img class="modal-img" id="modalImg" src="" alt="">
-      <div class="modal-img-ph" id="modalImgPh"></div>
-    </div>
-    <div class="modal-body">
-      <div class="modal-cat" id="modalCat"></div>
-      <h2 class="modal-title" id="modalTitle"></h2>
-      <p class="modal-desc" id="modalDesc"></p>
-      <div class="modal-meta" id="modalMeta"></div>
-      <div class="modal-actions" id="modalActions"></div>
-    </div>
-  </div>
-</div>
 
 <script type="module" src="main.js"></script>
 </body>

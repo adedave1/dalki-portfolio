@@ -1,418 +1,447 @@
-// ============================================
-//  admin.js — Dalki Admin Dashboard
-// ============================================
-
-import {
-  getItems, addItem, updateItem, deleteItem,
-  uploadImage, login, logout, onAuthChange,
+// ── admin.js — Dalki Admin Dashboard ─────────
+import { 
+  getProjects, addProject, updateProject, deleteProject, 
+  uploadImage, login, logout, onAuthChange 
 } from "./firebase.js";
 
-// ── ELEMENTS ──────────────────────────────────
-const loginScreen    = document.getElementById("loginScreen");
-const dashboard      = document.getElementById("dashboard");
-const loginForm      = document.getElementById("loginForm");
-const loginEmail     = document.getElementById("loginEmail");
-const loginPassword  = document.getElementById("loginPassword");
-const loginError     = document.getElementById("loginError");
-const loginBtn       = document.getElementById("loginBtn");
-const loginSpinner   = document.getElementById("loginSpinner");
-const loginBtnText   = document.getElementById("loginBtnText");
-const pwToggle       = document.getElementById("pwToggle");
-const adminEmailEl   = document.getElementById("adminEmail");
-const logoutBtn      = document.getElementById("logoutBtn");
-const logoutBtnMob   = document.getElementById("logoutBtnMobile");
+// ── ELEMENTS ─────────────────────────────────
+const loginScreen   = document.getElementById("loginScreen");
+const dashboard     = document.getElementById("dashboard");
+const loginForm     = document.getElementById("loginForm");
+const loginEmail    = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginError    = document.getElementById("loginError");
+const loginBtn      = document.getElementById("loginBtn");
+const loginBtnText  = document.getElementById("loginBtnText");
+const adminEmail    = document.getElementById("adminEmail");
+const logoutBtn     = document.getElementById("logoutBtn");
 
-const projectList    = document.getElementById("projectList");
-const projectCount   = document.getElementById("projectCount");
-const btnNewProject  = document.getElementById("btnNewProject");
-const navBadge       = document.getElementById("navBadge");
+const projectCount  = document.getElementById("projectCount");
+const projectList   = document.getElementById("projectList");
+const projectTable  = document.getElementById("projectTable");
+const emptyProjects = document.getElementById("emptyProjects");
+const navBadge      = document.getElementById("navBadge");
+const btnNewProject = document.getElementById("btnNewProject");
+const btnEmptyNew   = document.getElementById("btnEmptyNew");
 
-const uploadForm        = document.getElementById("uploadForm");
-const uploadPanelTitle  = document.getElementById("uploadPanelTitle");
-const editId            = document.getElementById("editId");
-const dropZone          = document.getElementById("dropZone");
-const dropInner         = document.getElementById("dropInner");
-const dropPreview       = document.getElementById("dropPreview");
-const previewImg        = document.getElementById("previewImg");
-const removeImg         = document.getElementById("removeImg");
-const fileInput         = document.getElementById("fileInput");
-const uploadProgress    = document.getElementById("uploadProgress");
-const progressFill      = document.getElementById("progressFill");
-const progressLabel     = document.getElementById("progressLabel");
-const fieldTitle        = document.getElementById("fieldTitle");
-const fieldCategory     = document.getElementById("fieldCategory");
-const fieldDescription  = document.getElementById("fieldDescription");
-const fieldProblem      = document.getElementById("fieldProblem");
-const fieldSolution     = document.getElementById("fieldSolution");
-const fieldResults      = document.getElementById("fieldResults");
-const fieldDownload     = document.getElementById("fieldDownload");
-const fieldSite         = document.getElementById("fieldSite");
-const fieldTags         = document.getElementById("fieldTags");
-const fieldPublished    = document.getElementById("fieldPublished");
-const saveBtn           = document.getElementById("saveBtn");
-const saveBtnLabel      = document.getElementById("saveBtnLabel");
-const btnCancel         = document.getElementById("btnCancel");
-const formError         = document.getElementById("formError");
+const createForm    = document.getElementById("createForm");
+const formTitle     = document.getElementById("formTitle");
+const editId        = document.getElementById("editId");
+const btnBackToList = document.getElementById("btnBackToList");
+const btnCancel     = document.getElementById("btnCancel");
+const btnSave       = document.getElementById("btnSave");
+const saveBtnText   = document.getElementById("saveBtnText");
+const formError     = document.getElementById("formError");
 
-const deleteModal    = document.getElementById("deleteModal");
-const cancelDelete   = document.getElementById("cancelDelete");
-const confirmDelete  = document.getElementById("confirmDelete");
-const toast          = document.getElementById("toast");
+const fieldTitle    = document.getElementById("fieldTitle");
+const fieldSlug     = document.getElementById("fieldSlug");
+const fieldShortDesc= document.getElementById("fieldShortDesc");
+const fieldCategory = document.getElementById("fieldCategory");
+const fieldGenre    = document.getElementById("fieldGenre");
+const fieldTags     = document.getElementById("fieldTags");
+const fieldDownload = document.getElementById("fieldDownload");
+const fieldSite     = document.getElementById("fieldSite");
+const fieldDescription= document.getElementById("fieldDescription");
+const fieldProblem  = document.getElementById("fieldProblem");
+const fieldSolution = document.getElementById("fieldSolution");
+const fieldResults  = document.getElementById("fieldResults");
+const fieldVideo    = document.getElementById("fieldVideo");
+const fieldSteam    = document.getElementById("fieldSteam");
+const fieldAppStore = document.getElementById("fieldAppStore");
+const fieldPlayStore= document.getElementById("fieldPlayStore");
+const fieldAmazon   = document.getElementById("fieldAmazon");
 
-// ── STATE ─────────────────────────────────────
-let selectedFile     = null;
-let existingImageURL = null;
-let pendingDeleteId  = null;
-let allItems      = [];
+const coverZone     = document.getElementById("coverZone");
+const coverInput    = document.getElementById("coverInput");
+const coverPreview  = document.getElementById("coverPreview");
+const coverPreviewImg=document.getElementById("coverPreviewImg");
+const removeCover   = document.getElementById("removeCover");
+const coverProgress = document.getElementById("coverProgress");
+const coverProgressBar=document.getElementById("coverProgressBar");
+const coverProgressText=document.getElementById("coverProgressText");
 
-// ── TOAST ─────────────────────────────────────
-function showToast(msg, type = "success") {
-  toast.textContent = msg;
-  toast.className   = `toast ${type} show`;
-  setTimeout(() => { toast.className = "toast"; }, 3200);
-}
+const screenshotZone  = document.getElementById("screenshotZone");
+const screenshotInput = document.getElementById("screenshotInput");
+const screenshotGrid  = document.getElementById("screenshotPreviewGrid");
 
-// ── AUTH ──────────────────────────────────────
+const deleteModal   = document.getElementById("deleteModal");
+const cancelDelete  = document.getElementById("cancelDelete");
+const confirmDelete = document.getElementById("confirmDelete");
+const toast         = document.getElementById("toast");
+
+// ── STATE ────────────────────────────────────
+let allProjects = [];
+let coverFile = null;
+let coverURL = null;
+let screenshots = [];
+let pendingDeleteId = null;
+
+// ── AUTH ─────────────────────────────────────
 onAuthChange(user => {
   if (user) {
     loginScreen.style.display = "none";
-    dashboard.style.display   = "flex";
-    adminEmailEl.textContent  = user.email;
+    dashboard.style.display = "flex";
+    adminEmail.textContent = user.email;
     loadProjects();
   } else {
     loginScreen.style.display = "flex";
-    dashboard.style.display   = "none";
+    dashboard.style.display = "none";
   }
 });
 
 loginForm.addEventListener("submit", async e => {
   e.preventDefault();
-  loginError.textContent = "";
-  loginError.classList.remove("show");
-  loginBtn.disabled      = true;
-  loginSpinner.classList.add("visible");
-  loginBtnText.textContent = "AUTHENTICATING...";
+  loginError.style.display = "none";
+  loginBtn.disabled = true;
+  loginBtnText.textContent = "Authenticating…";
   try {
     await login(loginEmail.value.trim(), loginPassword.value);
   } catch (err) {
-    loginError.textContent = err.code + " — " + err.message;
-    loginError.classList.add("show");
-    loginBtn.disabled      = false;
-    loginSpinner.classList.remove("visible");
-    loginBtnText.textContent = "AUTHENTICATE";
+    loginError.textContent = friendlyError(err.code);
+    loginError.style.display = "block";
+    loginBtn.disabled = false;
+    loginBtnText.textContent = "Authenticate";
   }
 });
 
 logoutBtn.addEventListener("click", () => logout());
-logoutBtnMob && logoutBtnMob.addEventListener("click", () => logout());
 
-pwToggle.addEventListener("click", () => {
-  const show = loginPassword.type === "password";
-  loginPassword.type   = show ? "text" : "password";
-  pwToggle.textContent = show ? "HIDE" : "SHOW";
-});
-
-function friendlyAuthError(code) {
+function friendlyError(code) {
   const map = {
-    "auth/invalid-email":      "Invalid email address.",
-    "auth/user-not-found":     "No account found with that email.",
-    "auth/wrong-password":     "Incorrect password.",
+    "auth/invalid-email": "Invalid email address.",
+    "auth/user-not-found": "No account found.",
+    "auth/wrong-password": "Incorrect password.",
     "auth/invalid-credential": "Incorrect email or password.",
-    "auth/too-many-requests":  "Too many attempts. Try again later.",
+    "auth/too-many-requests": "Too many attempts. Try again later.",
   };
   return map[code] || "Sign in failed. Check your credentials.";
 }
 
-// ── PANEL NAV ─────────────────────────────────
+// ── PANEL NAV ────────────────────────────────
 function goToPanel(name) {
-  document.querySelectorAll(".nav-item").forEach(b =>
+  document.querySelectorAll(".admin-nav-item").forEach(b =>
     b.classList.toggle("active", b.dataset.panel === name)
   );
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
   document.getElementById(`panel-${name}`).classList.add("active");
 }
 
-document.querySelectorAll(".nav-item").forEach(btn =>
+document.querySelectorAll(".admin-nav-item[data-panel]").forEach(btn =>
   btn.addEventListener("click", () => goToPanel(btn.dataset.panel))
 );
 
-// ── MOBILE SIDEBAR ────────────────────────────
-function initMobileSidebar() {
-  // Create overlay if not exists
-  let overlay = document.querySelector(".mobile-sidebar-overlay");
-  if (!overlay) {
-    overlay = document.createElement("div");
-    overlay.className = "mobile-sidebar-overlay";
-    document.body.appendChild(overlay);
-    
-    // Create hamburger if not exists
-    const topbar = document.querySelector(".mobile-topbar");
-    if (topbar && !document.querySelector(".sidebar-toggle")) {
-      const toggle = document.createElement("button");
-      toggle.className = "sidebar-toggle";
-      toggle.innerHTML = "☰";
-      toggle.style.cssText = "background:none;border:none;color:#E8EAF0;font-size:1.2rem;cursor:pointer;padding:0.2rem 0.5rem;";
-      topbar.insertBefore(toggle, topbar.firstChild);
-      
-      toggle.addEventListener("click", () => {
-        const sidebar = document.querySelector(".sidebar");
-        sidebar.style.display = sidebar.style.display === "flex" ? "none" : "flex";
-        sidebar.style.position = "fixed";
-        sidebar.style.zIndex = "100";
-        sidebar.style.height = "100vh";
-        overlay.classList.toggle("active");
-      });
-      
-      overlay.addEventListener("click", () => {
-        document.querySelector(".sidebar").style.display = "none";
-        overlay.classList.remove("active");
-      });
-    }
-  }
-}
+btnNewProject.addEventListener("click", () => { resetForm(); goToPanel("create"); });
+btnEmptyNew?.addEventListener("click", () => { resetForm(); goToPanel("create"); });
+btnBackToList.addEventListener("click", () => goToPanel("projects"));
+btnCancel.addEventListener("click", () => {
+  if (confirm("Discard changes?")) goToPanel("projects");
+});
 
-// ── SKELETON LOADING ──────────────────────────
-const SKELETON_ROW = `
-  <div class="skeleton-row">
-    <div class="skeleton-thumb"></div>
-    <div class="skeleton-text" style="width:70%"></div>
-    <div class="skeleton-text short" style="width:40%"></div>
-    <div class="skeleton-text tiny"></div>
-    <div style="display:flex;gap:0.5rem">
-      <div class="skeleton-text" style="width:45px;height:28px"></div>
-      <div class="skeleton-text" style="width:45px;height:28px"></div>
-    </div>
-  </div>
-`;
-
-// ── LOAD PROJECTS ─────────────────────────────
+// ── LOAD PROJECTS ────────────────────────────
 async function loadProjects() {
-  projectList.innerHTML = Array(5).fill(SKELETON_ROW).join("");
   try {
-    allItems = await getItems();
+    allProjects = await getProjects();
     renderTable();
   } catch (err) {
-    projectList.innerHTML = `<div class="table-empty">Error: ${err.message} <button onclick="loadProjects()" style="background:none;border:1px solid var(--border);color:var(--accent);padding:0.5rem 1rem;border-radius:6px;margin-top:1rem;cursor:pointer;">Retry</button></div>`;
+    projectList.innerHTML = `<div style="padding:40px;text-align:center;color:var(--red)">Error: ${err.message}</div>`;
   }
 }
 
 function renderTable() {
-  const count = allItems.length;
+  const count = allProjects.length;
   projectCount.textContent = count === 0 ? "No projects yet" : `${count} project${count !== 1 ? "s" : ""}`;
-
-  if (navBadge) {
-    navBadge.textContent   = count;
-    navBadge.style.display = count > 0 ? "inline-block" : "none";
-  }
+  navBadge.textContent = count;
+  navBadge.style.display = count > 0 ? "inline-block" : "none";
 
   if (count === 0) {
-    projectList.innerHTML = `<div class="table-empty">No projects yet — add your first one!</div>`;
+    projectTable.style.display = "none";
+    emptyProjects.style.display = "block";
     return;
   }
 
-  projectList.innerHTML = "";
-  allItems.forEach((p, index) => {
-    const isLive = p.published === true || p.published === "true";
-    const row    = document.createElement("div");
-    row.className  = "project-row";
-    row.dataset.id = p.id;
-    row.style.animationDelay = `${index * 0.05}s`;
-    row.style.animation = "fadeUp 0.4s ease both";
+  projectTable.style.display = "block";
+  emptyProjects.style.display = "none";
 
-    row.innerHTML = `
-      ${p.imageURL
-        ? `<img class="row-thumb" src="${p.imageURL}" alt="${p.title}" loading="lazy">`
-        : `<div class="row-thumb-placeholder"></div>`}
-      <span class="row-title">${p.title}</span>
-      <span class="row-cat">${p.category || "—"}</span>
-      <button class="row-status toggle-status" data-id="${p.id}" data-live="${isLive}" title="Click to toggle">
-        <span class="status-dot ${isLive ? "live" : "draft"}"></span>
-        ${isLive ? "Live" : "Draft"}
-      </button>
-      <div class="row-actions">
-        <button class="btn-edit" data-id="${p.id}">Edit</button>
-        <button class="btn-del"  data-id="${p.id}">Delete</button>
+  projectList.innerHTML = allProjects.map((p, i) => {
+    const vis = p.visibility || "draft";
+    const statusClass = vis === "public" ? "status-public" : "status-draft";
+    return `
+      <div class="admin-table-row fade-up" style="animation-delay:${i*0.05}s">
+        ${p.coverImage
+          ? `<img class="table-thumb" src="${p.coverImage}" alt="${p.title}" loading="lazy">`
+          : `<div class="table-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--bg-3)">📦</div>`}
+        <div>
+          <div style="font-size:14px;font-weight:600">${p.title}</div>
+          <div style="font-size:12px;color:var(--text-3)">${p.slug}</div>
+        </div>
+        <span style="font-size:13px;color:var(--text-2);text-transform:capitalize">${p.category || "—"}</span>
+        <span class="table-status ${statusClass}">${vis}</span>
+        <div style="display:flex;gap:6px">
+          <button class="table-btn table-btn-edit" data-id="${p.id}">Edit</button>
+          <button class="table-btn table-btn-del" data-id="${p.id}">Delete</button>
+        </div>
       </div>
     `;
+  }).join("");
 
-    row.querySelector(".btn-edit").addEventListener("click", () => openEdit(p));
-    row.querySelector(".btn-del").addEventListener("click", () => openDeleteModal(p.id));
-    row.querySelector(".toggle-status").addEventListener("click", () => togglePublished(p));
-    projectList.appendChild(row);
-  });
+  projectList.querySelectorAll(".table-btn-edit").forEach(btn =>
+    btn.addEventListener("click", () => openEdit(btn.dataset.id))
+  );
+  projectList.querySelectorAll(".table-btn-del").forEach(btn =>
+    btn.addEventListener("click", () => openDeleteModal(btn.dataset.id))
+  );
 }
 
-// ── TOGGLE STATUS ─────────────────────────────
-async function togglePublished(project) {
-  const btn = document.querySelector(`.toggle-status[data-id="${project.id}"]`);
-  if (!btn) return;
-  
-  // Animate transition
-  btn.style.transform = "scale(0.95)";
-  btn.style.opacity = "0.7";
-  
-  const newStatus = !(project.published === true || project.published === "true");
-  try {
-    await updateItem(project.id, { published: newStatus });
-    
-    btn.style.transform = "scale(1)";
-    btn.style.opacity = "1";
-    
-    showToast(newStatus ? "Project is now Live ✓" : "Project set to Draft");
-    
-    // Update local state without full reload
-    project.published = newStatus;
-    const isLive = newStatus;
-    btn.dataset.live = isLive;
-    btn.innerHTML = `<span class="status-dot ${isLive ? "live" : "draft"}"></span> ${isLive ? "Live" : "Draft"}`;
-    
-  } catch (err) {
-    btn.style.transform = "scale(1)";
-    btn.style.opacity = "1";
-    showToast("Failed to update: " + err.message, "error");
-  }
-}
-
-// ── NEW PROJECT ───────────────────────────────
-btnNewProject.addEventListener("click", () => {
-  resetForm();
-  uploadPanelTitle.textContent = "New Project";
-  goToPanel("upload");
+// ── SLUG ─────────────────────────────────────
+fieldTitle.addEventListener("input", () => {
+  fieldSlug.value = fieldTitle.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 });
 
-// ── EDIT ──────────────────────────────────────
-function openEdit(project) {
-  resetForm();
-  uploadPanelTitle.textContent = "Edit Project";
+// ── COVER UPLOAD ─────────────────────────────
+coverZone.addEventListener("click", () => coverInput.click());
+coverZone.addEventListener("dragover", e => { e.preventDefault(); coverZone.classList.add("dragover"); });
+coverZone.addEventListener("dragleave", () => coverZone.classList.remove("dragover"));
+coverZone.addEventListener("drop", e => {
+  e.preventDefault(); coverZone.classList.remove("dragover");
+  if (e.dataTransfer.files[0]) handleCover(e.dataTransfer.files[0]);
+});
+coverInput.addEventListener("change", () => { if (coverInput.files[0]) handleCover(coverInput.files[0]); });
 
-  editId.value             = project.id;
-  fieldTitle.value         = project.title       || "";
-  fieldCategory.value      = project.category    || "";
-  fieldDescription.value   = project.description || "";
-  fieldProblem.value       = project.problem     || "";
-  fieldSolution.value      = project.solution    || "";
-  fieldResults.value       = project.results     || "";
-  fieldDownload.value      = project.downloadURL || "";
-  fieldSite.value          = project.siteURL     || "";
-  fieldTags.value          = (project.tags || []).join(", ");
-  fieldPublished.value     = String(project.published ?? "true");
-
-  if (project.imageURL) {
-    existingImageURL          = project.imageURL;
-    previewImg.src            = project.imageURL;
-    dropInner.style.display   = "none";
-    dropPreview.style.display = "block";
-  }
-
-  goToPanel("upload");
-}
-
-btnCancel.addEventListener("click", () => { resetForm(); goToPanel("items"); });
-
-// ── DROP ZONE ─────────────────────────────────
-dropInner.addEventListener("click", () => fileInput.click());
-fileInput.addEventListener("change", () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
-
-dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
-dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
-dropZone.addEventListener("drop", e => {
-  e.preventDefault();
-  dropZone.classList.remove("dragover");
-  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+removeCover.addEventListener("click", () => {
+  coverFile = null; coverURL = null;
+  coverPreview.style.display = "none";
+  coverZone.style.display = "block";
+  coverInput.value = "";
 });
 
-removeImg.addEventListener("click", () => {
-  selectedFile = null; existingImageURL = null; previewImg.src = "";
-  dropPreview.style.display = "none"; dropInner.style.display = "flex";
-  fileInput.value = "";
-});
-
-function setFile(file) {
-  if (!file.type.startsWith("image/")) { showToast("Please select an image file.", "error"); return; }
-  if (file.size > 10 * 1024 * 1024)   { showToast("Image must be under 10 MB.", "error"); return; }
-  selectedFile = file;
+function handleCover(file) {
+  if (!file.type.startsWith("image/")) { showToast("Please select an image.", "error"); return; }
+  if (file.size > 10 * 1024 * 1024) { showToast("Max 10MB.", "error"); return; }
+  coverFile = file;
   const reader = new FileReader();
   reader.onload = e => {
-    previewImg.src            = e.target.result;
-    dropInner.style.display   = "none";
-    dropPreview.style.display = "block";
+    coverPreviewImg.src = e.target.result;
+    coverZone.style.display = "none";
+    coverPreview.style.display = "block";
   };
   reader.readAsDataURL(file);
 }
 
-// ── SAVE ──────────────────────────────────────
-uploadForm.addEventListener("submit", async e => {
+// ── SCREENSHOTS ──────────────────────────────
+screenshotZone.addEventListener("click", () => screenshotInput.click());
+screenshotZone.addEventListener("dragover", e => { e.preventDefault(); screenshotZone.classList.add("dragover"); });
+screenshotZone.addEventListener("dragleave", () => screenshotZone.classList.remove("dragover"));
+screenshotZone.addEventListener("drop", e => {
+  e.preventDefault(); screenshotZone.classList.remove("dragover");
+  Array.from(e.dataTransfer.files).forEach(handleScreenshot);
+});
+screenshotInput.addEventListener("change", () => Array.from(screenshotInput.files).forEach(handleScreenshot));
+
+function handleScreenshot(file) {
+  if (!file.type.startsWith("image/")) { showToast("Images only.", "error"); return; }
+  if (file.size > 5 * 1024 * 1024) { showToast("Max 5MB.", "error"); return; }
+  screenshots.push({ file, url: null });
+  renderScreenshots();
+}
+
+function renderScreenshots() {
+  screenshotGrid.innerHTML = screenshots.map((s, i) => {
+    const url = s.url || URL.createObjectURL(s.file);
+    return `
+      <div class="screenshot-item" style="position:relative;width:200px;height:130px">
+        <img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--r)">
+        <button type="button" data-index="${i}" style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.7);color:#fff;border:none;cursor:pointer;font-size:12px">✕</button>
+      </div>
+    `;
+  }).join("");
+
+  screenshotGrid.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      screenshots.splice(parseInt(btn.dataset.index), 1);
+      renderScreenshots();
+    });
+  });
+}
+
+// ── RICH TEXT ────────────────────────────────
+document.querySelectorAll(".rich-toolbar-dark button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const cmd = btn.dataset.cmd;
+    if (cmd === "createLink") {
+      const url = prompt("Enter URL:");
+      if (url) document.execCommand(cmd, false, url);
+    } else {
+      document.execCommand(cmd, false, null);
+    }
+    fieldDescription.focus();
+  });
+});
+
+// ── RADIO GROUPS ─────────────────────────────
+document.querySelectorAll(".radio-dark").forEach(group => {
+  group.querySelectorAll(".radio-dark-item").forEach(item => {
+    item.addEventListener("click", () => {
+      group.querySelectorAll(".radio-dark-item").forEach(i => i.classList.remove("selected"));
+      item.classList.add("selected");
+      const input = item.querySelector('input[type="radio"]');
+      if (input) input.checked = true;
+    });
+  });
+});
+
+// ── SAVE ─────────────────────────────────────
+createForm.addEventListener("submit", async e => {
   e.preventDefault();
-  formError.textContent = "";
+  formError.style.display = "none";
 
-  if (!fieldTitle.value.trim()) { formError.textContent = "Please enter a project title."; return; }
-  if (!fieldCategory.value)     { formError.textContent = "Please select a category."; return; }
+  if (!fieldTitle.value.trim()) { showFormError("Please enter a project title."); return; }
+  if (!fieldCategory.value) { showFormError("Please select a category."); return; }
+  if (!fieldSlug.value.trim()) { showFormError("Slug is required."); return; }
 
-  saveBtn.disabled         = true;
-  saveBtnLabel.textContent = "Saving…";
+  btnSave.disabled = true;
+  saveBtnText.textContent = "Saving…";
 
   try {
-    let imageURL     = existingImageURL || "";
-    let cloudinaryId = "";
-
-    if (selectedFile) {
-      uploadProgress.style.display = "flex";
-      const result = await uploadImage(selectedFile, pct => {
-        progressFill.style.width  = pct + "%";
-        progressLabel.textContent = pct + "%";
+    // Upload cover
+    let coverImageURL = coverURL;
+    if (coverFile) {
+      coverProgress.style.display = "flex";
+      const result = await uploadImage(coverFile, pct => {
+        coverProgressBar.style.width = pct + "%";
+        coverProgressText.textContent = pct + "%";
       });
-      imageURL              = result.url;
-      cloudinaryId          = result.cloudinaryId;
-      uploadProgress.style.display = "none";
+      coverImageURL = result.url;
+      coverProgress.style.display = "none";
     }
 
-    const tags = fieldTags.value.split(",").map(t => t.trim()).filter(Boolean);
+    // Upload screenshots
+    const uploadedScreenshots = [];
+    for (const s of screenshots) {
+      if (!s.url && s.file) {
+        const result = await uploadImage(s.file);
+        uploadedScreenshots.push(result.url);
+      } else if (s.url) {
+        uploadedScreenshots.push(s.url);
+      }
+    }
 
     const data = {
-      title:       fieldTitle.value.trim(),
-      category:    fieldCategory.value,
-      description: fieldDescription.value.trim(),
-      problem:     fieldProblem.value.trim(),
-      solution:    fieldSolution.value.trim(),
-      results:     fieldResults.value.trim(),
-      tags,
-      published:   fieldPublished.value === "true",
-      imageURL,
-      ...(cloudinaryId && { cloudinaryId }),
+      title: fieldTitle.value.trim(),
+      slug: fieldSlug.value.trim(),
+      shortDescription: fieldShortDesc.value.trim(),
+      category: fieldCategory.value,
+      genre: fieldGenre.value || null,
+      tags: fieldTags.value.split(",").map(t => t.trim()).filter(Boolean).slice(0, 10),
+      releaseStatus: document.querySelector('input[name="releaseStatus"]:checked')?.value || "released",
+      downloadURL: fieldDownload.value.trim() || null,
+      siteURL: fieldSite.value.trim() || null,
+      description: fieldDescription.innerHTML,
+      problem: fieldProblem.value.trim(),
+      solution: fieldSolution.value.trim(),
+      results: fieldResults.value.trim(),
+      screenshots: uploadedScreenshots,
+      videoURL: fieldVideo.value.trim() || null,
+      storeLinks: {
+        steam: fieldSteam.value.trim() || null,
+        appStore: fieldAppStore.value.trim() || null,
+        playStore: fieldPlayStore.value.trim() || null,
+        amazon: fieldAmazon.value.trim() || null,
+      },
+      communityType: document.querySelector('input[name="communityType"]:checked')?.value || "comments",
+      visibility: document.querySelector('input[name="visibility"]:checked')?.value || "draft",
+      coverImage: coverImageURL,
     };
 
     const id = editId.value;
     if (id) {
-      await updateItem(id, data);
-      showToast("Project updated ✓");
+      await updateProject(id, data);
+      showToast("Project updated!");
     } else {
-      await addItem(data);
-      showToast("Project added ✓");
+      await addProject(data);
+      showToast("Project created!");
     }
 
     resetForm();
     await loadProjects();
-    goToPanel("items");
+    goToPanel("projects");
 
   } catch (err) {
-    formError.textContent = "Error: " + err.message;
-    showToast("Something went wrong.", "error");
-  } finally {
-    saveBtn.disabled         = false;
-    saveBtnLabel.textContent = "Save project";
+    showFormError("Error: " + err.message);
+    btnSave.disabled = false;
+    saveBtnText.textContent = "Save Project";
   }
 });
 
-// ── DELETE ────────────────────────────────────
-function openDeleteModal(id) { pendingDeleteId = id; deleteModal.style.display = "flex"; }
+// ── EDIT ─────────────────────────────────────
+async function openEdit(id) {
+  resetForm();
+  formTitle.textContent = "Edit Project";
+  editId.value = id;
 
-cancelDelete.addEventListener("click", () => { deleteModal.style.display = "none"; pendingDeleteId = null; });
+  try {
+    const { getProjectById } = await import("./firebase.js");
+    const p = await getProjectById(id);
+    if (!p) { showToast("Project not found", "error"); return; }
+
+    fieldTitle.value = p.title || "";
+    fieldSlug.value = p.slug || "";
+    fieldShortDesc.value = p.shortDescription || "";
+    fieldCategory.value = p.category || "";
+    fieldGenre.value = p.genre || "";
+    fieldTags.value = (p.tags || []).join(", ");
+    fieldDownload.value = p.downloadURL || "";
+    fieldSite.value = p.siteURL || "";
+    fieldDescription.innerHTML = p.description || "";
+    fieldProblem.value = p.problem || "";
+    fieldSolution.value = p.solution || "";
+    fieldResults.value = p.results || "";
+    fieldVideo.value = p.videoURL || "";
+    fieldSteam.value = p.storeLinks?.steam || "";
+    fieldAppStore.value = p.storeLinks?.appStore || "";
+    fieldPlayStore.value = p.storeLinks?.playStore || "";
+    fieldAmazon.value = p.storeLinks?.amazon || "";
+
+    // Set radios
+    if (p.releaseStatus) document.querySelector(`input[name="releaseStatus"][value="${p.releaseStatus}"]`)?.closest(".radio-dark-item")?.click();
+    if (p.communityType) document.querySelector(`input[name="communityType"][value="${p.communityType}"]`)?.closest(".radio-dark-item")?.click();
+    if (p.visibility) document.querySelector(`input[name="visibility"][value="${p.visibility}"]`)?.closest(".radio-dark-item")?.click();
+
+    // Cover
+    if (p.coverImage) {
+      coverURL = p.coverImage;
+      coverPreviewImg.src = p.coverImage;
+      coverZone.style.display = "none";
+      coverPreview.style.display = "block";
+    }
+
+    // Screenshots
+    if (p.screenshots) {
+      screenshots = p.screenshots.map(url => ({ file: null, url }));
+      renderScreenshots();
+    }
+
+    goToPanel("create");
+  } catch (err) {
+    showToast("Error: " + err.message, "error");
+  }
+}
+
+// ── DELETE ───────────────────────────────────
+function openDeleteModal(id) {
+  pendingDeleteId = id;
+  deleteModal.classList.add("open");
+}
+
+cancelDelete.addEventListener("click", () => {
+  deleteModal.classList.remove("open");
+  pendingDeleteId = null;
+});
 
 confirmDelete.addEventListener("click", async () => {
   if (!pendingDeleteId) return;
-  deleteModal.style.display = "none";
+  deleteModal.classList.remove("open");
   try {
-    await deleteItem(pendingDeleteId);
+    await deleteProject(pendingDeleteId);
     showToast("Project deleted.");
     pendingDeleteId = null;
     await loadProjects();
@@ -421,50 +450,38 @@ confirmDelete.addEventListener("click", async () => {
   }
 });
 
-// ── RESET ─────────────────────────────────────
+// ── RESET ────────────────────────────────────
 function resetForm() {
-  uploadForm.reset();
-  editId.value                 = "";
-  selectedFile                 = null;
-  existingImageURL             = null;
-  previewImg.src               = "";
-  dropPreview.style.display    = "none";
-  dropInner.style.display      = "flex";
-  uploadProgress.style.display = "none";
-  progressFill.style.width     = "0%";
-  progressLabel.textContent    = "0%";
-  formError.textContent        = "";
-  saveBtnLabel.textContent     = "Save project";
-  saveBtn.disabled             = false;
+  createForm.reset();
+  editId.value = "";
+  formTitle.textContent = "New Project";
+  coverFile = null; coverURL = null;
+  coverPreview.style.display = "none";
+  coverZone.style.display = "block";
+  coverProgress.style.display = "none";
+  coverProgressBar.style.width = "0%";
+  screenshots = [];
+  screenshotGrid.innerHTML = "";
+  fieldDescription.innerHTML = "";
+  formError.style.display = "none";
+  btnSave.disabled = false;
+  saveBtnText.textContent = "Save Project";
+
+  // Reset radios to defaults
+  document.querySelector('input[name="releaseStatus"][value="released"]')?.closest(".radio-dark-item")?.click();
+  document.querySelector('input[name="communityType"][value="comments"]')?.closest(".radio-dark-item")?.click();
+  document.querySelector('input[name="visibility"][value="draft"]')?.closest(".radio-dark-item")?.click();
 }
 
-// ── KEYBOARD SHORTCUTS ────────────────────────
-document.addEventListener("keydown", e => {
-  // Ctrl/Cmd + N = New Project
-  if ((e.ctrlKey || e.metaKey) && e.key === "n") {
-    e.preventDefault();
-    if (dashboard.style.display !== "none") {
-      btnNewProject.click();
-    }
-  }
-  
-  // Escape = close modals, cancel edit
-  if (e.key === "Escape") {
-    if (deleteModal.style.display === "flex") {
-      cancelDelete.click();
-    } else if (document.getElementById("panel-upload").classList.contains("active") && !editId.value) {
-      btnCancel.click();
-    }
-  }
-  
-  // Ctrl/Cmd + S = Save form (when in upload panel)
-  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-    if (document.getElementById("panel-upload").classList.contains("active")) {
-      e.preventDefault();
-      uploadForm.dispatchEvent(new Event("submit"));
-    }
-  }
-});
+// ── UTILS ────────────────────────────────────
+function showToast(msg, type = "success") {
+  toast.textContent = msg;
+  toast.className = `toast ${type} show`;
+  setTimeout(() => { toast.className = "toast"; }, 3200);
+}
 
-// ── INIT ─────────────────────────────────────
-initMobileSidebar();
+function showFormError(msg) {
+  formError.textContent = msg;
+  formError.style.display = "block";
+  formError.scrollIntoView({ behavior: "smooth", block: "center" });
+}
