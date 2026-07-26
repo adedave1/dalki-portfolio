@@ -6,21 +6,145 @@
 <title>404 — Dalki</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#FAFAFA;color:#111;font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
-.num{font-family:'Space Grotesk',sans-serif;font-size:100px;font-weight:700;color:#F59E0B;letter-spacing:-4px;line-height:1}
-h1{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin:16px 0 8px}
-p{color:#6B7280;font-size:14px;font-weight:300;margin-bottom:28px}
-a{display:inline-flex;align-items:center;gap:8px;background:#F59E0B;color:#fff;padding:11px 22px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;transition:0.2s ease}
-a:hover{background:#D97706;transform:translateY(-2px)}
+
+:root{
+  --bg:#0A0A0F;
+  --bg-2:#111118;
+  --text:#F0F0F5;
+  --text-2:#A0A0B0;
+  --text-3:#6B6B7B;
+  --cyan:#00D4FF;
+  --cyan-dim:rgba(0,212,255,0.15);
+  --amber:#F59E0B;
+  --ff-h:'Space Grotesk',sans-serif;
+  --ff-b:'Inter',sans-serif;
+}
+
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--ff-b);
+  overflow:hidden;
+}
+
+body{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:24px;
+  position:relative;
+}
+
+/* Subtle particle dots */
+body::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(0,212,255,0.03) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(245,158,11,0.02) 0%, transparent 40%);
+  pointer-events:none;
+}
+
+.num{
+  font-family:var(--ff-h);
+  font-size:clamp(80px,15vw,140px);
+  font-weight:700;
+  letter-spacing:-6px;
+  line-height:1;
+  background:linear-gradient(135deg, var(--cyan) 0%, var(--amber) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-shadow:0 0 60px rgba(0,212,255,0.2);
+  position:relative;
+  z-index:1;
+}
+
+h1{
+  font-family:var(--ff-h);
+  font-size:24px;
+  font-weight:700;
+  margin:20px 0 10px;
+  letter-spacing:-0.5px;
+  position:relative;
+  z-index:1;
+}
+
+p{
+  color:var(--text-3);
+  font-size:15px;
+  font-weight:300;
+  line-height:1.6;
+  max-width:400px;
+  margin-bottom:32px;
+  position:relative;
+  z-index:1;
+}
+
+a{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:var(--cyan);
+  color:var(--bg);
+  padding:12px 28px;
+  border-radius:12px;
+  text-decoration:none;
+  font-family:var(--ff-h);
+  font-weight:600;
+  font-size:14px;
+  letter-spacing:0.02em;
+  transition:0.2s ease;
+  position:relative;
+  z-index:1;
+}
+
+a:hover{
+  background:#fff;
+  box-shadow:0 0 30px rgba(0,212,255,0.3);
+  transform:translateY(-2px);
+}
+
+/* Floating animation for the number */
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+}
+
+.num{
+  animation:float 4s ease-in-out infinite;
+}
+
+/* Small decorative elements */
+.deco{
+  position:absolute;
+  width:4px;height:4px;
+  border-radius:50%;
+  background:var(--cyan);
+  opacity:0.3;
+}
+.deco-1{top:20%;left:15%;animation:float 6s ease-in-out infinite 0.5s}
+.deco-2{top:60%;right:10%;animation:float 5s ease-in-out infinite 1s}
+.deco-3{bottom:25%;left:25%;animation:float 7s ease-in-out infinite 1.5s}
+.deco-4{top:35%;right:25%;background:var(--amber);animation:float 5.5s ease-in-out infinite 0.8s}
 </style>
 </head>
 <body>
+  <div class="deco deco-1"></div>
+  <div class="deco deco-2"></div>
+  <div class="deco deco-3"></div>
+  <div class="deco deco-4"></div>
+
   <div class="num">404</div>
-  <h1>Page not found</h1>
-  <p>This page doesn't exist — but great things do.</p>
+  <h1>Lost in space</h1>
+  <p>This page doesn't exist — but great things do. Let's get you back to Dalki.</p>
   <a href="/">← Back to Dalki</a>
 </body>
 </html>
