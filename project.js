@@ -23,6 +23,8 @@ const blockSolution    = document.getElementById("blockSolution");
 const projectSolution  = document.getElementById("projectSolution");
 const blockResults     = document.getElementById("blockResults");
 const projectResults   = document.getElementById("projectResults");
+const infoPrivacyRow   = document.getElementById("infoPrivacyRow");
+const infoPrivacyLink  = document.getElementById("infoPrivacyLink");
 const blockVideo       = document.getElementById("blockVideo");
 const videoEmbed       = document.getElementById("videoEmbed");
 const blockSimilar     = document.getElementById("blockSimilar");
@@ -119,6 +121,12 @@ function renderProject() {
   if (p.results) {
     blockResults.style.display = "block";
     projectResults.textContent = p.results;
+  }
+
+  // Privacy Policy
+  if (p.privacyPolicy) {
+    infoPrivacyRow.style.display = "flex";
+    infoPrivacyLink.href = `/privacy.html?slug=${encodeURIComponent(p.slug)}`;
   }
 
   // Screenshots

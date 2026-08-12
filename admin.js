@@ -45,6 +45,7 @@ const fieldDescription= document.getElementById("fieldDescription");
 const fieldProblem  = document.getElementById("fieldProblem");
 const fieldSolution = document.getElementById("fieldSolution");
 const fieldResults  = document.getElementById("fieldResults");
+const fieldPrivacyPolicy = document.getElementById("fieldPrivacyPolicy");
 const fieldVideo    = document.getElementById("fieldVideo");
 const fieldSteam    = document.getElementById("fieldSteam");
 const fieldAppStore = document.getElementById("fieldAppStore");
@@ -339,6 +340,7 @@ createForm.addEventListener("submit", async e => {
       problem: fieldProblem.value.trim(),
       solution: fieldSolution.value.trim(),
       results: fieldResults.value.trim(),
+      privacyPolicy: fieldPrivacyPolicy.value.trim(),
       screenshots: uploadedScreenshots,
       videoURL: fieldVideo.value.trim() || null,
       storeLinks: {
@@ -395,6 +397,7 @@ async function openEdit(id) {
     fieldProblem.value = p.problem || "";
     fieldSolution.value = p.solution || "";
     fieldResults.value = p.results || "";
+    fieldPrivacyPolicy.value = p.privacyPolicy || "";
     fieldVideo.value = p.videoURL || "";
     fieldSteam.value = p.storeLinks?.steam || "";
     fieldAppStore.value = p.storeLinks?.appStore || "";
